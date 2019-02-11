@@ -6,6 +6,15 @@ Lookup of vaccination rates
 
 - Child care centers vaccinations rates from [MN Department of Health](http://www.health.state.mn.us/divs/idepc/immunize/stats/childcare/index.html).
 - Kindergarten vaccinations rates from [MN Department of Health](http://www.health.state.mn.us/divs/idepc/immunize/stats/school/index.html).
+- Active license and address information manually compiled and not in repo. Should be put into `sources/childcare_vax.json`.
+
+Get source data:
+
+```sh
+curl -L "http://www.health.state.mn.us/divs/idepc/immunize/stats/childcare/center1718.xlsx" | in2csv -H -f xlsx > sources/child-care-centers.csv;
+
+curl -L "http://www.health.state.mn.us/divs/idepc/immunize/stats/school/pervaxkind1718.xlsx" | in2csv -H -f xlsx --sheet "K_School" > sources/kindergartens.csv;
+```
 
 For processing, see [docs/application-data.md](./docs/application-data.md).
 

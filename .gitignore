@@ -4,6 +4,9 @@ config.custom.json
 .awspublish*
 .cache*
 
+# Non-public sources
+sources/childcare_vax.json
+
 # Data parts
 data/sources/*
 # Exceptions like
