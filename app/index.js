@@ -49,7 +49,9 @@ $(document).ready(() => {
 
   // Get data
   window
-    .fetch('../assets/data/locations.json')
+    .fetch(
+      'https://static.startribune.com/news/projects-staging/all/201902-vaccination-rates/assets/data/locations.json'
+    )
     .then(r => r.json())
     .then(locations => {
       console.log(locations);
