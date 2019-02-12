@@ -100,6 +100,13 @@ function compileData() {
     return d;
   });
 
+  // Alter some specific data
+  kindergartens = _.map(kindergartens, d => {
+    d.name = nameFixes(toTitleCase(d.name));
+    d.district = toTitleCase(d.district);
+    return d;
+  });
+
   // Combine data
   let locations = [].concat(daycares).concat(kindergartens);
 
@@ -224,6 +231,70 @@ function stats() {
   );
 
   return stats;
+}
+
+// Stupid title case function
+// https://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
+function toTitleCase(input) {
+  let i;
+  let j;
+  let str;
+  let lowers;
+  let uppers;
+  str = input.replace(/([^\W_]+[^\s-]*) */g, function(txt) {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
+
+  // Certain minor words should be left lowercase unless
+  // they are the first or last words in the string
+  lowers = [
+    'A',
+    'An',
+    'The',
+    'And',
+    'But',
+    'Or',
+    'For',
+    'Nor',
+    'As',
+    'At',
+    'By',
+    'For',
+    'From',
+    'In',
+    'Into',
+    'Near',
+    'Of',
+    'On',
+    'Onto',
+    'To',
+    'With'
+  ];
+  for (i = 0, j = lowers.length; i < j; i++)
+    str = str.replace(new RegExp('\\s' + lowers[i] + '\\s', 'gi'), function(
+      txt
+    ) {
+      return txt.toLowerCase();
+    });
+
+  // Certain words such as initialisms or acronyms should be left uppercase
+  uppers = ['Id', 'Tv', 'ii', 'iii', 'iv', 'v', 'vi'];
+  for (i = 0, j = uppers.length; i < j; i++)
+    str = str.replace(
+      new RegExp('\\b' + uppers[i] + '\\b', 'gi'),
+      uppers[i].toUpperCase()
+    );
+
+  return str;
+}
+
+// Common fixes
+function nameFixes(input) {
+  return input.replace(/([^\W_]+[^\s-]*) */g, function(txt) {
+    return txt
+      .replace(/^el\.?(\s*)$/i, 'Elementary$1')
+      .replace(/^sch\.?(\s*)$/i, 'School$1');
+  });
 }
 
 // Build data config
