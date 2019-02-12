@@ -1,22 +1,96 @@
 
 <div class="strib-styles ssa ssb ssc">
-  <section class="container-lg">
-    <p>Content goes here.</p>
+  <div class="container-lg">
+    <div class="hero">
+      <h1>Vaccinations rates in Minnesota</h1>
 
-    <p>
-      Example image:
-      <!-- Since this markup will live in CMS, the URL needs to be fully to static,
-        but for development we rewrite to local -->
-      <img src="{ production.url }assets/images/strib/strib-logo-transparent-307.png" alt="Test image">
-    </p>
-  </section>
+      <!-- <p class="lead container-sm"></p> -->
+
+      <div class="byline">
+        <address>By
+          <a rel="author" href="http://startribune.com/maryjo-webster/303594441/">MaryJo Webster</a>
+          and
+          <a rel="author" href="http://startribune.com/maryjo-webster/440928273/">Alan Palazzolo</a>
+        </address>
+        <span class="spacer"></span>
+        Star Tribune
+        <span class="spacer-alt"></span>
+        <time pubdate datetime="2019-01-22T10:00:00">January 22, 2019</time>
+      </div>
+
+      <div class="share-placeholder">
+        <!-- share -->
+      </div>
+    </div>
+  </div>
+
+  <div class="container-copy bottom-space-extra">
+    <p>A measles outbreak <a href="https://www.washingtonpost.com/national/health-science/it-will-take-off-like-a-wildfire-the-unique-dangers-of-the-washington-state-measles-outbreak/2019/02/06/cfd5088a-28fa-11e9-b011-d8500644dc98_story.html?utm_term=.85cef1950a23" target="_blank" rel="noopener">this year in Washington state</a> and another last year that started in <a href="http://www.startribune.com/measles-outbreak-is-over-state-health-officials-say/441764203/">Hennepin County</a> have raised new attention on communities that have low vaccination rates.</p>
+
+    <p>Last year’s outbreak in Hennepin County, that sickened 79 people, shed light on low vaccination rates among children in the Twin Cities Somali community, where immunizations plummeted after a discredited rumor several years ago that vaccines can cause autism.</p>
+
+    <p>This year’s outbreak in Washington State is centered in Clark County, where an estimated 25 percent of children are not vaccinated.</p>
+
+    <p>Data from the Minnesota Department of Health on <a href="http://www.health.state.mn.us/divs/idepc/immunize/stats/school/index.html" target="_blank" rel="noopener">vaccination rates in public and private schools</a> and <a href="http://www.health.state.mn.us/divs/idepc/immunize/stats/childcare/index.html" target="_blank" rel="noopener">child care centers</a> show that there are similar pockets of low vaccination rates throughout the state.</p>
+
+    <p>Four Minnesota counties also have low vaccination rates against measles, according to data on children who were in kindergarten in 2017-18. In Aitkin County, about 37 percent of kindergarteners weren’t vaccinated. In Lincoln, Houston and Grant counties, nearly 20 percent aren’t vaccinated. </p>
+
+    <p>There are just over 200 public or private schools with 15 percent or more of their kindergarteners unvaccinated.</p>
+
+    <p>Among the state’s 1,700 child care centers required to report vaccination rates, there are about 74 centers with 15 percent or more of their children, age two and older, lacking measles immunization. There are some with up to 70 percent of children unvaccinated.  There are also about 300 facilities that did not report in 2017-18, the most recent year of data available. </p>
+
+    <p>Use the search tools below to find vaccination rates for kindergartens and child care centers throughout Minnesota.</p>
+  </div>
+
+  <div class="place-search-form container-copy">
+    <h3>Search for a location</h3>
+
+    <form class="form-compact">
+      <div class="form-item form-item-input">
+        <label class="sr-only" for="place-search">Search for a location</label>
+
+        <input type="search" ref:placeSelect  id="place-search" bind:value="placeSearch"  placeholder="Search for a place in the metro area" aria-describedby="place-search-help">
+
+        <small id="place-search-help">
+          Start typing to search for a child care center or kindergarten in Minnesota.
+        </small>
+      </div>
+    <form>
+  </div>
+
+  <div class="container-lg">
+    <div class="locations">
+      <Location
+        {...locations[Math.floor(Math.random() * locations.length)]}
+        stats="{ stats }"
+      />
+
+      <Location
+        {...locations[Math.floor(Math.random() * locations.length)]}
+        stats="{ stats }"
+      />
+
+      <Location
+        {...locations[Math.floor(Math.random() * locations.length)]}
+        stats="{ stats }"
+      />
+
+      <Location
+        {...locations[Math.floor(Math.random() * locations.length)]}
+        stats="{ stats }"
+      />
+    </div>
+  </div>
 </div>
 
-
-
-
 <script>
+  import Location from "./shared/_location.svelte.html";
+
   export default {
+    components: {
+      Location
+    },
+
     oncreate() {
       // For content that lives in the CMS directly, we hack
       // around the share bits by removing it before we load
@@ -24,6 +98,12 @@
       if (this.get().attachShare) {
         this.get().attachShare();
       }
+    },
+
+    data() {
+      return {
+        placeSearch: ""
+      };
     }
   };
 </script>

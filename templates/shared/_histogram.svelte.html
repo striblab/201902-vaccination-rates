@@ -1,0 +1,244 @@
+<div class="chart-figure { figureClass ? figureClass : '' }">
+  <div class="label { noLabel ? 'sr-only' : '' }" id="label-{ id }">{ title }</div>
+
+  <figure aria-labelledby="label-{ id }">
+    <figcaption class="figcaption-top { noCaption ? 'sr-only' : '' }">
+      <slot>Needs caption slot</slot>
+    </figcaption>
+
+    <div class="chart chart-histogram" ref:chart role="img" title="{ title }"></div>
+  </figure>
+</div>
+
+
+<script>
+  import { isNaN } from "lodash";
+
+  /* global d3, c3 */
+  export default {
+    oncreate() {
+      this.drawChart();
+    },
+
+    onupdate({ changed, current, previous }) {
+      if (
+        changed.data ||
+        changed.dataConfig ||
+        changed.lineAnnotationOptions ||
+        changed.annoitations
+      ) {
+        this.drawChart();
+      }
+    },
+
+    ondestroy() {
+      if (this.get().chart) {
+        this.set({ chart: this.get().chart.destroy() });
+      }
+    },
+
+    methods: {
+      drawChart() {
+        let chart = this.get().chart;
+
+        if (chart && !this.get().redraw) {
+          // Update
+          //chart.unload();
+          chart.load({
+            columns: this.get().dataConfig
+              ? this.get().dataConfig.columns
+              : [this.get().xData, this.get().yData]
+          });
+
+          this.drawAnnotation();
+          this.drawLineAnnotation();
+
+          return;
+        } else if (chart && this.get().redraw) {
+          chart.destroy();
+        }
+
+        chart = c3.generate({
+          bindto: this.refs.chart,
+          color: {
+            pattern: this.get().colors
+          },
+          padding: {
+            left: this.get().yHide ? 0 : undefined,
+            right: 10,
+            bottom: 5
+          },
+          data: this.get().dataConfig
+            ? this.get().dataConfig
+            : {
+                x: this.get().xLabel,
+                columns: [this.get().xData, this.get().yData],
+                type: "bar"
+              },
+
+          bar: {
+            width: {
+              ratio: 0.925
+            }
+          },
+          axis: {
+            x: {
+              show: this.get().xHide ? false : true,
+              min: this.parseNumber(this.get().xMin),
+              max: this.parseNumber(this.get().xMax),
+              tick: {
+                format: this.get().xTickFormat,
+                outer: false,
+                count: this.get().xTickCount
+              },
+              padding: {
+                left: 0,
+                right: 0
+              }
+            },
+            y: {
+              show: this.get().yHide ? false : true,
+              min: this.parseNumber(this.get().yMin),
+              max: this.parseNumber(this.get().yMax),
+              padding: 0,
+              label: {
+                text: this.get().yLabel,
+                position: "outer-middle"
+              },
+              tick: {
+                outer: false
+              }
+            }
+          },
+          grid: {
+            x: {
+              show: true
+            },
+            y: {
+              show: true
+            }
+          },
+          legend: {
+            position: "bottom",
+            show: false
+          },
+          tooltip: {
+            show: false
+          },
+          interaction: {
+            enabled: this.get().interactive || false
+          },
+          onrendered: () => {
+            setTimeout(() => {
+              this.drawAnnotation();
+              this.drawLineAnnotation();
+            }, 200);
+          }
+        });
+
+        this.set({ chart });
+        this.drawAnnotation();
+        this.drawLineAnnotation();
+      },
+
+      drawAnnotation() {
+        if (!this.get().annotations || !this.get().chart) {
+          return;
+        }
+        let chart = this.get().chart;
+
+        // remove annotation if there.
+        if (this.get().annotation) {
+          d3.select(this.refs.chart)
+            .select(".annotation-group")
+            .remove();
+        }
+
+        // Create new annotation
+        let annotation = d3
+          .select(this.refs.chart)
+          .select("svg .c3-chart-lines")
+          .append("g")
+          .attr("class", "annotation-group")
+          .call(
+            d3
+              .annotation()
+              .type(d3.annotationCallout)
+              .annotations(this.get().annotations(chart))
+          );
+
+        this.set({ annotation });
+      },
+
+      drawLineAnnotation() {
+        if (!this.get().lineAnnotationOptions || !this.get().chart) {
+          return;
+        }
+        let chart = this.get().chart;
+        let lineAnnotationOptions = this.get().lineAnnotationOptions(chart);
+
+        // remove annotation if there.
+        if (this.get().lineAnnotation) {
+          d3.select(this.refs.chart)
+            .select(".annotation-line-group")
+            .remove();
+        }
+
+        // Create new annotation
+        let lineAnnotation = d3
+          .select(this.refs.chart)
+          .select("svg .c3-chart-lines")
+          .append("g")
+          .attr("class", "annotation-line-group");
+
+        // Add line
+        lineAnnotation
+          .append("line")
+          .attr("class", "annotation-line-group-line")
+          .attr("x1", lineAnnotationOptions.x1)
+          .attr("x2", lineAnnotationOptions.x2)
+          .attr("y1", lineAnnotationOptions.y1)
+          .attr("y2", lineAnnotationOptions.y2);
+
+        // Add label
+        if (lineAnnotationOptions.text) {
+          lineAnnotation
+            .append("text")
+            .attr("class", "annotation-line-group-text")
+            .attr("x", lineAnnotationOptions.textx)
+            .attr("y", lineAnnotationOptions.texty)
+            .text(lineAnnotationOptions.text);
+        }
+
+        // Set to component
+        this.set({ lineAnnotation });
+      },
+
+      parseNumber(input) {
+        if (isNaN(parseFloat(input))) {
+          return undefined;
+        }
+
+        return parseFloat(input);
+      }
+    },
+
+    computed: {
+      xData({ data, xLabel, xProp }) {
+        return data ? [xLabel].concat(data.map(d => d[xProp])) : [];
+      },
+      yData({ data, yLabel, yProp }) {
+        return data ? [yLabel].concat(data.map(d => d[yProp])) : [];
+      }
+    },
+
+    data() {
+      return {
+        colors: ["#857aaa", "#5bbf48"],
+        id: Math.floor(Math.random() * 100000)
+      };
+    }
+  };
+</script>
+
+

@@ -11,26 +11,26 @@
   "cms": {
     "defaultArticleContentTemplateRewriteClass": "article-lcd-body-content",
     "pages": [
-      
       {
         "id": "index",
         "articleId": "NEEDS-ARTICLE-ID",
         "lcd": "NEEDS-LCD-ID",
         "default": true
       }
-      
     ]
   },
 
-
   "styles": {
     "globals": [
+      "http://static.startribune.com/assets/libs/selectizejs/0.12.6/css/selectize.css"
     ]
   },
   "js": {
     "globals": [
       "https://cdn.polyfill.io/v2/polyfill.min.js",
-      "https://static.startribune.com/assets/libs/pym.js/1.3.2/pym.v1.min.js"
+      "https://code.jquery.com/jquery-1.12.4.min.js",
+      "http://static.startribune.com/assets/libs/d3/5.7.0/d3.min.js",
+      "http://static.startribune.com/assets/libs/c3/0.6.7/c3.min.js"
     ]
   },
   "publishToken": "c371310196ec8afca9264880353ea1ea",

@@ -3,6 +3,7 @@ const csvParse = require('csv-parse/lib/sync');
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
+const ss = require('simple-statistics');
 
 // Common headers
 const commonHeaders = {
@@ -40,7 +41,7 @@ const commonHeaders = {
 };
 
 // Compile data
-function compile() {
+function compileData() {
   let licensing = JSON.parse(
     fs.readFileSync(path.join(__dirname, 'sources', 'childcare_vax.json'))
   );
@@ -94,7 +95,7 @@ function compile() {
     d.type = 'child-care-centers';
     return d;
   });
-  kindergartens = _.map(daycares, d => {
+  kindergartens = _.map(kindergartens, d => {
     d.type = 'kindergarten';
     return d;
   });
@@ -129,8 +130,24 @@ function compile() {
     `Rows that an exclusion: ${_.filter(locations, l => l.exclusion).length}`
   );
 
+  // Sort
+  locations = _.sortBy(locations, 'name');
+
+  // Add id
+  locations = _.map(locations, (l, i) => {
+    l.id = i;
+    return l;
+  });
+
+  // Filter out statewide
+  locations = _.filter(locations, l => {
+    return !l.name.match(/statewide/i);
+  });
+
   // Cleanup a bit
-  locations = _.omit(locations, 'blankColumn01');
+  locations = _.map(locations, l => {
+    return _.omit(l, ['blankColumn01']);
+  });
 
   return locations;
 }
@@ -142,9 +159,63 @@ function alterSplice(input, begin, length) {
   return i;
 }
 
+// Stats
+function stats() {
+  let locations = compileData();
+
+  // Make aggregate data
+  let stats = {};
+  _.each(
+    ['mmrVac', 'dtapVac', 'hibVac', 'polioVac', 'hepBVac', 'hepAVac'],
+    f => {
+      let s = _.filter(_.map(locations, f), d => _.isNumber(d));
+
+      // Top level stats
+      stats[f] = stats[f] || {};
+      stats[f].count = s.length;
+      stats[f].min = ss.min(s);
+      stats[f].max = ss.max(s);
+      stats[f].median = ss.median(s);
+      stats[f].mean = ss.mean(s);
+      stats[f].std = ss.standardDeviation(s);
+
+      // Histogram numbers
+      let bins = Math.min(Math.max(Math.ceil(Math.sqrt(s.length)), 12), 20);
+      let rawInterval = Math.abs((stats[f].max - stats[f].min) / bins);
+      let interval = parseFloat(rawInterval.toPrecision(1));
+      let intervalMin = parseFloat(stats[f].min.toPrecision(1));
+
+      let histogram = [];
+      let max = intervalMin + interval;
+      let min = intervalMin;
+      while (max < stats[f].max) {
+        histogram.push({
+          min,
+          max,
+          count: _.filter(s, d => {
+            return d >= min && d < max;
+          }).length
+        });
+
+        min = max;
+        max = min + interval;
+      }
+
+      stats[f].histogram = histogram;
+    }
+  );
+
+  return stats;
+}
+
 // Build data config
 module.exports = {
   locations: {
-    data: compile()
+    data: compileData(),
+    local: 'locations.json'
+  },
+  stats: {
+    data: stats(),
+    local: 'stats.json'
   }
 };

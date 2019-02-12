@@ -1,0 +1,85 @@
+/**
+ * Chart styles
+ */
+
+.chart-figure {
+  margin-bottom: 1.5em;
+}
+
+.label {
+  font-size: 0.9em;
+}
+
+.chart {
+  //@include aspect-ratio(4, 3);
+  width: 100%;
+  height: 15em;
+  padding-top: 0.5em;
+
+  .tick {
+    font-size: 0.7em;
+    font-weight: 200;
+    stroke-width: 2;
+
+    line {
+      //stroke: map-get($grays, "light");
+    }
+
+    text {
+      fill: map-get($grays, "light");
+    }
+  }
+
+  .c3-ygrid,
+  .c3-xgrid {
+    stroke: map-get($grays, "lighter");
+    stroke-dasharray: 2;
+    stroke-width: 1;
+  }
+
+  &.chart-line .c3-ygrid:first-child {
+    stroke: map-get($grays, "dark");
+    stroke-dasharray: 0;
+    stroke-width: 1;
+  }
+
+  .c3-chart-lines {
+    path {
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .c3-circles {
+      display: none;
+    }
+  }
+
+  .c3-chart-bar {
+    path {
+      stroke-width: 1;
+      stroke: $color-white !important;
+    }
+  }
+
+  .c3-axis-y-label,
+  .c3-legend-item text {
+    font-size: 0.75em;
+  }
+
+  .annotation-line-group {
+    line {
+      stroke-width: 2;
+      stroke: $placeColor;
+    }
+
+    text {
+      font-size: 0.7em;
+    }
+  }
+}
+
+.metro-index-chart {
+  .chart {
+    height: 9em;
+  }
+}
