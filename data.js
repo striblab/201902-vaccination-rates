@@ -135,7 +135,7 @@ function compileData() {
 
   // Add id
   locations = _.map(locations, (l, i) => {
-    l.id = i;
+    l.id = i.toString();
     return l;
   });
 
@@ -220,8 +220,6 @@ function stats() {
       });
 
       stats[f].histogram = histogram;
-
-      console.log(stats[f]);
     }
   );
 

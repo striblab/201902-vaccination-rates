@@ -45,46 +45,55 @@
   <div class="place-search-form container-copy">
     <h3>Search for a location</h3>
 
-    <form class="form-compact">
+    <form class="form-compact" on:submit="handleSearch(event)">
       <div class="form-item form-item-input">
         <label class="sr-only" for="place-search">Search for a location</label>
 
-        <input type="search" ref:placeSelect  id="place-search" bind:value="placeSearch"  placeholder="Search for a place in the metro area" aria-describedby="place-search-help">
+        <input type="search" ref:placeSelect  id="place-search" bind:value="placeSearch"  placeholder="Enter a center, school, or district" aria-describedby="place-search-help">
 
         <small id="place-search-help">
           Start typing to search for a child care center or kindergarten in Minnesota.
         </small>
       </div>
+
+      <div class="form-item">
+        <button type="submit" on:click="handleSearch(event)">Search</button>
+      </div>
     <form>
   </div>
 
   <div class="container-lg">
-    <div class="locations">
-      <Location
-        {...locations[Math.floor(Math.random() * locations.length)]}
-        stats="{ stats }"
-      />
+    {#if noResults}
+      <p class="no-results search-note">
+        Your search did not find any results.
+      </p>
+    {:elseif searchResults && searchResults.length}
+      <div class="locations">
+        {#each searchResults as r, i (r.id)}
+          <Location
+            {...r}
+            stats="{ stats }"
+          />
+        {/each}
+      </div>
 
-      <Location
-        {...locations[Math.floor(Math.random() * locations.length)]}
-        stats="{ stats }"
-      />
-
-      <Location
-        {...locations[Math.floor(Math.random() * locations.length)]}
-        stats="{ stats }"
-      />
-
-      <Location
-        {...locations[Math.floor(Math.random() * locations.length)]}
-        stats="{ stats }"
-      />
-    </div>
+      {#if moreResults}
+        <div class="more-results search-note">
+          <p>There are more results for the search "{ placeSearch }"; trying making your search more specific to find more exact  location.</p>
+        </div>
+      {/if}
+    {:else}
+      <p class="no-searching search-note">
+        Use the search above to search for a child care center or kindergarten in Minnesota.
+      </p>
+    {/if}
   </div>
 </div>
 
 <script>
   import Location from "./shared/_location.svelte.html";
+  import lunr from "lunr";
+  import { find } from "lodash";
 
   export default {
     components: {
@@ -92,17 +101,96 @@
     },
 
     oncreate() {
+      let { locations } = this.get();
+
       // For content that lives in the CMS directly, we hack
       // around the share bits by removing it before we load
       // the component, then re-attach here.
       if (this.get().attachShare) {
         this.get().attachShare();
       }
+
+      // Create search index
+      let index = lunr(function() {
+        this.ref("id");
+        this.field("name");
+        this.field("city");
+        this.field("district");
+
+        locations.forEach(l => {
+          this.add(l);
+        });
+      });
+
+      // Attach (no reason to watch any changes)
+      this.__searchIndex = index;
+    },
+
+    methods: {
+      handleSearch(event) {
+        if (event && event.preventDefault) {
+          event.preventDefault();
+        }
+
+        if (this.get().placeSearch) {
+          this.search(this.get().placeSearch);
+        }
+      },
+
+      search(terms) {
+        console.log(terms);
+        if (!terms) {
+          return;
+        }
+
+        // Values we need
+        let { searchResultsLimit, locations } = this.get();
+
+        // Search
+        let results = this.__searchIndex.search(terms);
+        console.log(results);
+
+        // If no results
+        if (!results || !results.length) {
+          this.set({ noResults: true });
+          return;
+        }
+
+        // Get results
+        let found = [];
+        results.forEach((r, ri) => {
+          if (ri < searchResultsLimit) {
+            let f = find(locations, { id: r.ref });
+
+            if (f) {
+              found.push(f);
+            }
+          }
+        });
+
+        this.set({
+          searchResults: found,
+          moreResults: results.length > searchResultsLimit
+        });
+      },
+
+      resetSearch() {
+        this.set({
+          placeSearch: "",
+          searchResults: [],
+          moreResults: false,
+          noResults: false
+        });
+      }
     },
 
     data() {
       return {
-        placeSearch: ""
+        placeSearch: "",
+        searchResultsLimit: 20,
+        searchResults: [],
+        moreResults: false,
+        noResults: false
       };
     }
   };

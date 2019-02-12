@@ -1,2 +1,2 @@
 $stateColor: map-get($theme, "orange-dark");
-$placeColor: $color-black;
+$placeColor: map-get($theme, "red-dark");

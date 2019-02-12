@@ -6,7 +6,11 @@
   <figure aria-labelledby="label-{ id }">
     <div class="chart chart-histogram" ref:chart role="img" title="{ title }"
       bind:clientWidth="containerWidth" bind:clientHeight="containerHeight">
-      <svg viewbox="0 0 { containerWidth } { containerHeight }" width="{ containerWidth }" height="{ containerHeight }" preserveaspectratio="xMidYMid meet">
+      <svg
+        viewbox="0 0 { containerWidth || defaultWidth } { containerHeight || defaultHeight }"
+        width="{ containerWidth || defaultWidth }"
+        height="{ containerHeight || defaultHeight }"
+        preserveaspectratio="xMidYMid meet">
         <g class="chart-area" transform="translate({ padding.left }, { padding.top })">
           <g class="axis x-axis">
             {#if xTicks}
@@ -132,7 +136,7 @@
     data() {
       return {
         defaultWidth: 400,
-        defaultHeight: 300,
+        defaultHeight: 200,
         padding: { top: 0, right: 20, bottom: 25, left: 10 },
         xMin: 0,
         xMax: 1,

@@ -1,7 +1,9 @@
 <div class="location">
-  <div class="location-type">{ type }</div>
-  <h3>{ name }</h3>
-  <h4>{ district || city }</h4>
+  <div class="location-header">
+    <div class="location-type">{ locationTypes[type] }</div>
+    <h3>{ name }</h3>
+    <h4>{ city ? `${city}, MN` : `${district} school district` }</h4>
+  </div>
 
   {#if exclusion}
     <div class="exclusion">
@@ -24,7 +26,7 @@
 
               <tr>
                 <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> fully vaccination rate</td>
-                <td class="value"><strong>{ percent(mmrVac) }</strong></td>
+                <td class="value mmr-value"><strong>{ percent(mmrVac) }</strong></td>
               </tr>
 
               <tr>
@@ -136,7 +138,6 @@
 <script>
   import { isNumber, maxBy, find, filter, minBy } from "lodash";
   import Histogram from "./_histogram.svelte.html";
-  import styles from "@striblab/strib-styles/build/strib-styles.styles.js";
 
   export default {
     components: {
@@ -163,10 +164,12 @@
     },
 
     helpers: {
-      percent(input, placeholder = "-", decimals = 1) {
+      percent(input, placeholder = "-", decimals = 0) {
         if (isNumber(input)) {
-          return `${Math.round(input * 100 * Math.pow(10, decimals)) /
-            Math.pow(10, decimals)}%`;
+          return decimals === 0 && input < 0.01 && input > 0
+            ? `< 1%`
+            : `${Math.round(input * 100 * Math.pow(10, decimals)) /
+                Math.pow(10, decimals)}%`;
         }
 
         return placeholder;
@@ -177,8 +180,10 @@
 
     data() {
       return {
-        stateColor: styles.theme["orange-dark"].hex,
-        placeColor: styles["color-text"].hex
+        locationTypes: {
+          "child-care-centers": "Child care center",
+          kindergarten: "Kindergarten"
+        }
       };
     }
   };
