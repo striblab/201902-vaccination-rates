@@ -182,13 +182,22 @@ function stats() {
       // Histogram numbers
       let bins = Math.min(Math.max(Math.ceil(Math.sqrt(s.length)), 12), 20);
       let rawInterval = Math.abs((stats[f].max - stats[f].min) / bins);
+
+      // Manually define;
+      bins = 20;
+      rawInterval = 0.05;
+
       let interval = parseFloat(rawInterval.toPrecision(1));
       let intervalMin = parseFloat(stats[f].min.toPrecision(1));
+
+      // Manually define
+      interval = 0.05;
+      intervalMin = 0;
 
       let histogram = [];
       let max = intervalMin + interval;
       let min = intervalMin;
-      while (max < stats[f].max) {
+      while (max <= stats[f].max) {
         histogram.push({
           min,
           max,
@@ -201,7 +210,18 @@ function stats() {
         max = min + interval;
       }
 
+      // Last bin
+      histogram.push({
+        min,
+        max,
+        count: _.filter(s, d => {
+          return d >= min && d < max;
+        }).length
+      });
+
       stats[f].histogram = histogram;
+
+      console.log(stats[f]);
     }
   );
 

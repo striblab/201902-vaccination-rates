@@ -1,241 +1,152 @@
-<div class="chart-figure { figureClass ? figureClass : '' }">
-  <div class="label { noLabel ? 'sr-only' : '' }" id="label-{ id }">{ title }</div>
+<div class="chart-figure">
+  {#if title}
+    <div class="label { noLabel ? 'sr-only' : '' }">{ title }</div>
+  {/if}
 
   <figure aria-labelledby="label-{ id }">
-    <figcaption class="figcaption-top { noCaption ? 'sr-only' : '' }">
-      <slot>Needs caption slot</slot>
-    </figcaption>
+    <div class="chart chart-histogram" ref:chart role="img" title="{ title }"
+      bind:clientWidth="containerWidth" bind:clientHeight="containerHeight">
+      <svg viewbox="0 0 { containerWidth } { containerHeight }" width="{ containerWidth }" height="{ containerHeight }" preserveaspectratio="xMidYMid meet">
+        <g class="chart-area" transform="translate({ padding.left }, { padding.top })">
+          <g class="axis x-axis">
+            {#if xTicks}
+              {#each xTicks as tick, i}
+                <g class="tick tick-{ i }" transform="translate({ xScale(tick) }, { yScale.range()[0] })">
+                  <line class="grid-line" y1="{ chartHeight * -1 }" y2="0" x1="0" x2="0"></line>
+                  <text y="5" text-anchor="middle">{ xTickFormat ? xTickFormat(tick, i, xTicks.length) : tick }</text>
+                </g>
+              {/each}
+            {/if}
 
-    <div class="chart chart-histogram" ref:chart role="img" title="{ title }"></div>
+            {#if xBaseline}
+              <line class="baseline" y1="{ chartHeight + 0.5 }" y2="{ chartHeight + 0.5}" x1="0" x2="{ chartWidth }"></line>
+            {/if}
+          </g>
+
+          <g class="axis y-axis">
+            {#if yTicks}
+              {#each yTicks as tick, i}
+                <g class="tick tick-{ i }" transform="translate(0, { yScale(tick) })">
+                  <line x2="{ chartWidth }"></line>
+
+                  <text y="-3" x="3" text-anchor="start">{ yTickFormat ? yTickFormat(tick, i, xTicks.length) : tick }</text>
+                </g>
+              {/each}
+            {/if}
+
+            {#if yBaseline}
+              <line class="baseline" y1="0" y2="{ chartHeight }" x1="0" x2="0"></line>
+            {/if}
+          </g>
+
+          <g class="histogram-bars">
+            {#each data as d, i}
+              {#if d.count}
+                <rect class="histogram-bar"
+                  x="{ xScale(d.min) }"
+                  y="{ Math.min(yScale(d.count), yScale(yMax * 0.01)) }"
+                  width="{ xScale(d.max) - xScale(d.min) }"
+                  height="{ chartHeight - (Math.min(yScale(d.count), yScale(yMax * 0.01))) }"
+                ></rect>
+              {/if}
+            {:else}
+              <!-- -->
+            {/each}
+          </g>
+
+          {#if annotationLines}
+            <g class="annotation-lines">
+              {#each annotationLines as a, i}
+                <line class="annotation-line annotation-line-{ i }"
+                  x1="{ xScale(a) }"
+                  y1="{ 0 }"
+                  x2="{ xScale(a) }"
+                  y2="{ chartHeight }"></line>
+              {/each}
+            </g>
+          {/if}
+        </g>
+      </svg>
+    </div>
+
+    <figcaption class="figcaption-bottom { noCaption ? 'sr-only' : '' }">
+      <slot></slot>
+    </figcaption>
   </figure>
 </div>
 
 
 <script>
   import { isNaN } from "lodash";
+  import { scaleLinear } from "d3-scale";
 
   /* global d3, c3 */
   export default {
     oncreate() {
-      this.drawChart();
-    },
+      let { xMin, xMax, yMin, yMax, chartWidth, chartHeight } = this.get();
 
-    onupdate({ changed, current, previous }) {
-      if (
-        changed.data ||
-        changed.dataConfig ||
-        changed.lineAnnotationOptions ||
-        changed.annoitations
-      ) {
-        this.drawChart();
-      }
-    },
-
-    ondestroy() {
-      if (this.get().chart) {
-        this.set({ chart: this.get().chart.destroy() });
-      }
-    },
-
-    methods: {
-      drawChart() {
-        let chart = this.get().chart;
-
-        if (chart && !this.get().redraw) {
-          // Update
-          //chart.unload();
-          chart.load({
-            columns: this.get().dataConfig
-              ? this.get().dataConfig.columns
-              : [this.get().xData, this.get().yData]
-          });
-
-          this.drawAnnotation();
-          this.drawLineAnnotation();
-
-          return;
-        } else if (chart && this.get().redraw) {
-          chart.destroy();
-        }
-
-        chart = c3.generate({
-          bindto: this.refs.chart,
-          color: {
-            pattern: this.get().colors
-          },
-          padding: {
-            left: this.get().yHide ? 0 : undefined,
-            right: 10,
-            bottom: 5
-          },
-          data: this.get().dataConfig
-            ? this.get().dataConfig
-            : {
-                x: this.get().xLabel,
-                columns: [this.get().xData, this.get().yData],
-                type: "bar"
-              },
-
-          bar: {
-            width: {
-              ratio: 0.925
-            }
-          },
-          axis: {
-            x: {
-              show: this.get().xHide ? false : true,
-              min: this.parseNumber(this.get().xMin),
-              max: this.parseNumber(this.get().xMax),
-              tick: {
-                format: this.get().xTickFormat,
-                outer: false,
-                count: this.get().xTickCount
-              },
-              padding: {
-                left: 0,
-                right: 0
-              }
-            },
-            y: {
-              show: this.get().yHide ? false : true,
-              min: this.parseNumber(this.get().yMin),
-              max: this.parseNumber(this.get().yMax),
-              padding: 0,
-              label: {
-                text: this.get().yLabel,
-                position: "outer-middle"
-              },
-              tick: {
-                outer: false
-              }
-            }
-          },
-          grid: {
-            x: {
-              show: true
-            },
-            y: {
-              show: true
-            }
-          },
-          legend: {
-            position: "bottom",
-            show: false
-          },
-          tooltip: {
-            show: false
-          },
-          interaction: {
-            enabled: this.get().interactive || false
-          },
-          onrendered: () => {
-            setTimeout(() => {
-              this.drawAnnotation();
-              this.drawLineAnnotation();
-            }, 200);
-          }
-        });
-
-        this.set({ chart });
-        this.drawAnnotation();
-        this.drawLineAnnotation();
-      },
-
-      drawAnnotation() {
-        if (!this.get().annotations || !this.get().chart) {
-          return;
-        }
-        let chart = this.get().chart;
-
-        // remove annotation if there.
-        if (this.get().annotation) {
-          d3.select(this.refs.chart)
-            .select(".annotation-group")
-            .remove();
-        }
-
-        // Create new annotation
-        let annotation = d3
-          .select(this.refs.chart)
-          .select("svg .c3-chart-lines")
-          .append("g")
-          .attr("class", "annotation-group")
-          .call(
-            d3
-              .annotation()
-              .type(d3.annotationCallout)
-              .annotations(this.get().annotations(chart))
-          );
-
-        this.set({ annotation });
-      },
-
-      drawLineAnnotation() {
-        if (!this.get().lineAnnotationOptions || !this.get().chart) {
-          return;
-        }
-        let chart = this.get().chart;
-        let lineAnnotationOptions = this.get().lineAnnotationOptions(chart);
-
-        // remove annotation if there.
-        if (this.get().lineAnnotation) {
-          d3.select(this.refs.chart)
-            .select(".annotation-line-group")
-            .remove();
-        }
-
-        // Create new annotation
-        let lineAnnotation = d3
-          .select(this.refs.chart)
-          .select("svg .c3-chart-lines")
-          .append("g")
-          .attr("class", "annotation-line-group");
-
-        // Add line
-        lineAnnotation
-          .append("line")
-          .attr("class", "annotation-line-group-line")
-          .attr("x1", lineAnnotationOptions.x1)
-          .attr("x2", lineAnnotationOptions.x2)
-          .attr("y1", lineAnnotationOptions.y1)
-          .attr("y2", lineAnnotationOptions.y2);
-
-        // Add label
-        if (lineAnnotationOptions.text) {
-          lineAnnotation
-            .append("text")
-            .attr("class", "annotation-line-group-text")
-            .attr("x", lineAnnotationOptions.textx)
-            .attr("y", lineAnnotationOptions.texty)
-            .text(lineAnnotationOptions.text);
-        }
-
-        // Set to component
-        this.set({ lineAnnotation });
-      },
-
-      parseNumber(input) {
-        if (isNaN(parseFloat(input))) {
-          return undefined;
-        }
-
-        return parseFloat(input);
-      }
+      this.set({
+        xScale: scaleLinear()
+          .domain([xMin, xMax])
+          .range([0, chartWidth]),
+        yScale: scaleLinear()
+          .domain([yMin, yMax])
+          .range([chartHeight, 0])
+      });
     },
 
     computed: {
-      xData({ data, xLabel, xProp }) {
-        return data ? [xLabel].concat(data.map(d => d[xProp])) : [];
+      chartWidth({ containerWidth, padding, defaultWidth }) {
+        return containerWidth
+          ? containerWidth - padding.left - padding.right
+          : defaultWidth;
       },
-      yData({ data, yLabel, yProp }) {
-        return data ? [yLabel].concat(data.map(d => d[yProp])) : [];
+
+      chartHeight({ containerHeight, padding, defaultHeight }) {
+        return containerHeight
+          ? containerHeight - padding.top - padding.bottom
+          : defaultHeight;
+      },
+
+      xScale({ scaleLinear, xMin, xMax, chartWidth }) {
+        return scaleLinear()
+          .domain([xMin, xMax])
+          .range([0, chartWidth]);
+      },
+
+      yScale({ scaleLinear, yMin, yMax, chartHeight }) {
+        return scaleLinear()
+          .domain([yMin, yMax])
+          .range([chartHeight, 0]);
+      },
+
+      xTicks({ xTickCount, xScale }) {
+        return xScale && xScale.ticks ? xScale.ticks(xTickCount) : undefined;
+      },
+
+      yTicks({ yTickCount, yScale }) {
+        return yScale && yScale.ticks ? yScale.ticks(yTickCount) : undefined;
       }
     },
 
     data() {
       return {
-        colors: ["#857aaa", "#5bbf48"],
-        id: Math.floor(Math.random() * 100000)
+        defaultWidth: 400,
+        defaultHeight: 300,
+        padding: { top: 10, right: 20, bottom: 25, left: 10 },
+        xMin: 0,
+        xMax: 1,
+        yMin: 0,
+        yMax: 100,
+        xTickCount: 10,
+        yTickCount: 10,
+        xBaseline: true,
+        xTickFormat: (t, i, len) =>
+          `${Math.round(t * 100)}${i === len - 1 ? "%" : ""}`,
+        yTickFormat: (t, i, len) => `${t ? t.toLocaleString() : ""}`,
+        xScale: i => i,
+        yScale: i => i,
+        scaleLinear
       };
     }
   };

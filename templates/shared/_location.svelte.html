@@ -11,63 +11,6 @@
     <div>
       <div class="vaccination-rates row">
 
-        <div class="col col-50 rate">
-          <div class="rate-label">
-            <abbr title="Measles, Mumps, and Rubella">MMR</abbr>
-          </div>
-
-          <div class="rate-vac">
-            { percent(mmrVac) }
-          </div>
-
-          <div class="rate-vac-label">
-            Fully vaccinated
-          </div>
-
-          <div class="mmr-vac-chart">
-            <Histogram
-              figureClass="mmr-vac-chart-histogram"
-              title="Percent completely vaccinated"
-              xLabel="Percent vaccinated"
-              yLabel="Number of locations"
-              yHide="{ true }"
-              yMin="0"
-              yMax="{ maxBy(stats.mmrVac.histogram, 'count').count * 1.15 }"
-              xMin="0"
-              xMax="1"
-              xTickCount="10"
-              colors="{ [stateColor, placeColor] }"
-              dataConfig="{{
-                xs: {
-                  'Number of places': 'Percent vaccinated'
-                },
-                columns: [
-                  ['Percent vaccinated'].concat(stats.mmrVac.histogram.map(d => (d.min + d.max) / 2)),
-                  ['Number of places'].concat(stats.mmrVac.histogram.map(d => d.count))
-                ],
-                type: 'bar'
-              }}"
-              xTickFormat="{ d => { return `${Math.round(d * 100)}%`; }}"
-              lineAnnotationOptions="{ mmrVac ? (chart) => {
-                return {
-                  x1: chart.internal.x(mmrVac),
-                  y1: chart.internal.y(maxBy(stats.mmrVac.histogram, 'count').count * 1.15),
-                  x2: chart.internal.x(mmrVac),
-                  y2: chart.internal.y(0),
-                  textx: chart.internal.x(mmrVac) + 3,
-                  texty: chart.internal.y(maxBy(stats.mmrVac.histogram, 'count').count * 1.05),
-                  //text: name
-                }
-              } : undefined }"
-              redraw="{ true }"
-            >Chatter chatter chatter.
-              {#if mmrVac}
-                In { name }, about { percent(mmrVac) } of enrolled children are completely vaccinated.
-              {/if}
-            </Histogram>
-          </div>
-        </div>
-
         <div class="col col-25 rate">
           <div class="rate-label">
             Enrollment
@@ -84,6 +27,34 @@
 
         <div class="col col-25 rate">
           <div class="rate-label">
+            <abbr title="Measles, Mumps, and Rubella">MMR</abbr>
+          </div>
+
+          <div class="rate-vac">
+            { percent(mmrVac) }
+          </div>
+
+          <div class="rate-vac-label">
+            Fully vaccinated
+          </div>
+        </div>
+
+        <div class="col col-50 rate">
+          <div class="mmr-vac-chart">
+            <Histogram
+              data="{ stats.mmrVac.histogram }"
+              yMax="{ maxBy(stats.mmrVac.histogram, 'count').count * 1.1 }"
+              annotationLines="{ [mmrVac] }">
+              The chart belows shows the rate of <abbr title="Measles, Mumps, and Rubella">MMR</abbr> fully vaccinated in all kindergartens and child care centers in Minnesota.  { name } had a rate of { percent(mmrVac) } as of ??.
+            </Histogram>
+          </div>
+        </div>
+      </div>
+
+      <div class="vaccination-rates row second-row">
+
+        <div class="col col-20 rate">
+          <div class="rate-label">
             <abbr title="Diphtheria, Tetanus, and Whooping cough (Pertussis)">DTaP</abbr>
           </div>
 
@@ -96,21 +67,7 @@
           </div>
         </div>
 
-        <div class="col col-25 rate">
-          <div class="rate-label">
-            <abbr title="Haemophilus influenzae type b">Hib</abbr>
-          </div>
-
-          <div class="rate-vac">
-            { percent(hibVac) }
-          </div>
-
-          <div class="rate-vac-label">
-            Fully vaccinated
-          </div>
-        </div>
-
-        <div class="col col-25 rate">
+        <div class="col col-20 rate">
           <div class="rate-label">
             Polio
           </div>
@@ -124,7 +81,7 @@
           </div>
         </div>
 
-        <div class="col col-25 rate">
+        <div class="col col-20 rate">
           <div class="rate-label">
             Hepatitis B
           </div>
@@ -138,7 +95,21 @@
           </div>
         </div>
 
-        <div class="col col-25 rate">
+        <div class="col col-20 rate">
+          <div class="rate-label">
+            <abbr title="Haemophilus influenzae type b">Hib</abbr>
+          </div>
+
+          <div class="rate-vac">
+            { percent(hibVac) }
+          </div>
+
+          <div class="rate-vac-label">
+            Fully vaccinated
+          </div>
+        </div>
+
+        <div class="col col-20 rate">
           <div class="rate-label">
             Hepatitis A
           </div>
