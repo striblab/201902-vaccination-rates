@@ -18,3 +18,40 @@
   margin-bottom: 3em;
   font-style: italic;
 }
+
+.form-compact {
+  .form-item-input {
+    width: 100%;
+  }
+
+  small {
+    font-size: 0.75em;
+  }
+}
+
+.location-lists {
+  &.col {
+    padding-left: 2em;
+  }
+
+  ul {
+    margin: 0;
+    font-size: 0.85em;
+  }
+
+  .active {
+    font-weight: bold;
+  }
+}
+
+.article-footer {
+  margin-bottom: 4em;
+
+  ul {
+    margin: 0;
+  }
+
+  ul li {
+    margin-bottom: 0.5em;
+  }
+}

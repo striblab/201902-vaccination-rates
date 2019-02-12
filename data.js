@@ -102,8 +102,14 @@ function compileData() {
 
   // Alter some specific data
   kindergartens = _.map(kindergartens, d => {
-    d.name = nameFixes(toTitleCase(d.name));
-    d.district = toTitleCase(d.district);
+    d.name = nameFixes(toTitleCase(cleanString(d.name)));
+    d.district = toTitleCase(cleanString(d.district));
+    return d;
+  });
+
+  daycares = _.map(daycares, d => {
+    d.name = cleanString(d.name);
+    d.city = cleanString(d.city);
     return d;
   });
 
@@ -292,9 +298,19 @@ function toTitleCase(input) {
 function nameFixes(input) {
   return input.replace(/([^\W_]+[^\s-]*) */g, function(txt) {
     return txt
-      .replace(/^el\.?(\s*)$/i, 'Elementary$1')
+      .replace(/^(el\.?|elem\.?)(\s*)$/i, 'Elementary$1')
       .replace(/^sch\.?(\s*)$/i, 'School$1');
   });
+}
+
+// Clean excel strings
+function cleanString(input) {
+  return input && input.match
+    ? input
+      .replace(/[\s\r\n]+/g, ' ')
+      .replace(/(_?x000d_?)+/gi, ' ')
+      .trim()
+    : input;
 }
 
 // Build data config

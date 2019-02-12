@@ -43,23 +43,39 @@
   </div>
 
   <div class="place-search-form container-copy">
-    <h3>Search for a location</h3>
+    <div class="row">
+      <div class="col col-100 col-md-60">
+        <h3>Search for a location</h3>
 
-    <form class="form-compact" on:submit="handleSearch(event)">
-      <div class="form-item form-item-input">
-        <label class="sr-only" for="place-search">Search for a location</label>
+        <form class="form-compact" on:submit="handleSearch(event)">
+          <div class="form-item form-item-input">
+            <label class="sr-only" for="place-search">Search for a location</label>
 
-        <input type="search" ref:placeSelect  id="place-search" bind:value="placeSearch"  placeholder="Enter a center, school, or district" aria-describedby="place-search-help">
+            <input type="search" ref:placeSelect  id="place-search" bind:value="placeSearch"  placeholder="Enter a center, school, or district" aria-describedby="place-search-help">
 
-        <small id="place-search-help">
-          Start typing to search for a child care center or kindergarten in Minnesota.
-        </small>
+            <small id="place-search-help">
+              Type in name, city, or district keywords to search for a child care center or kindergarten in Minnesota.
+            </small>
+          </div>
+
+          <div class="form-item">
+            <button type="submit" on:click="handleSearch(event)">Search</button>
+          </div>
+        <form>
       </div>
 
-      <div class="form-item">
-        <button type="submit" on:click="handleSearch(event)">Search</button>
+      <div class="col col-100 col-md-40 location-lists">
+        <aside>
+          <h3 class="label">Notable locations</h3>
+
+          <ul>
+            {#each Object.entries(locationLists) as [li, l]}
+              <li><a href="#/{ li }" class="{ locationList === li ? 'active' : ''}" on:click="specificList(l, li, event)">{ l.title }</li>
+            {/each}
+          </ul>
+        </aside>
       </div>
-    <form>
+    </div>
   </div>
 
   <div class="container-lg">
@@ -88,12 +104,23 @@
       </p>
     {/if}
   </div>
+
+  <div class="container-copy">
+    <footer class="article-footer">
+      <p>Data for <a href="http://www.health.state.mn.us/divs/idepc/immunize/stats/school/index.html" target="_blank" rel="noopener">vaccination rates in public and private schools</a> and <a href="http://www.health.state.mn.us/divs/idepc/immunize/stats/childcare/index.html" target="_blank" rel="noopener">child care centers</a> for the 2017-2018 school year provided by the Minnesota Department of Health.</p>
+
+      <ul>
+        <li>To protect privacy, schools and school districts with kindergarten enrollment of fewer than 5 children have their data redacted.</li>
+        <li>&dagger; "Partially vaccinated or no doses" includes students who are in the process of completing a vaccine series, have not been vaccinated and do not have an exemption on file, or who did not submit vaccine records to their school health staff.</li>
+      </ul>
+    </footer>
+  </div>
 </div>
 
 <script>
   import Location from "./shared/_location.svelte.html";
   import lunr from "lunr";
-  import { find } from "lodash";
+  import { find, sort, orderBy, take, filter } from "lodash";
 
   export default {
     components: {
@@ -138,7 +165,6 @@
       },
 
       search(terms) {
-        console.log(terms);
         if (!terms) {
           return;
         }
@@ -148,7 +174,6 @@
 
         // Search
         let results = this.__searchIndex.search(terms);
-        console.log(results);
 
         // If no results
         if (!results || !results.length) {
@@ -170,7 +195,35 @@
 
         this.set({
           searchResults: found,
-          moreResults: results.length > searchResultsLimit
+          moreResults: results.length > searchResultsLimit,
+          locationList: undefined
+        });
+      },
+
+      specificList(list, listId, event) {
+        if (event && event.preventDefault) {
+          event.preventDefault();
+        }
+
+        let { locations } = this.get();
+        this.resetSearch();
+        this.set({ locationList: listId });
+
+        let filtered = filter(locations, list.filter);
+        if (list.sort) {
+          filtered = orderBy(
+            filtered,
+            list.sort.map(s => s[0]),
+            list.sort.map(s => s[1])
+          );
+        }
+
+        if (list.limit) {
+          filtered = take(filtered, list.limit);
+        }
+
+        this.set({
+          searchResults: filtered
         });
       },
 
@@ -179,7 +232,8 @@
           placeSearch: "",
           searchResults: [],
           moreResults: false,
-          noResults: false
+          noResults: false,
+          locationList: undefined
         });
       }
     },
@@ -190,7 +244,21 @@
         searchResultsLimit: 20,
         searchResults: [],
         moreResults: false,
-        noResults: false
+        noResults: false,
+        locationLists: {
+          "lowest-child-care-centers": {
+            title: "Child care centers with the lowest rates",
+            filter: l => l.type === "child-care-centers" && !l.exclusion,
+            sort: [[l => l.mmrVac, "asc"]],
+            limit: 20
+          },
+          "lowest-kindergartens": {
+            title: "Kindergartens with the lowest rates",
+            filter: l => l.type === "kindergarten" && !l.exclusion,
+            sort: [[l => l.mmrVac, "asc"]],
+            limit: 20
+          }
+        }
       };
     }
   };

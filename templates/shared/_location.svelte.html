@@ -25,22 +25,22 @@
               </tr>
 
               <tr>
-                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> fully vaccination rate</td>
+                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> fully-vaccinated</td>
                 <td class="value mmr-value"><strong>{ percent(mmrVac) }</strong></td>
               </tr>
 
               <tr>
-                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> non-medical excemptions</td>
+                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> non-medical excemption</td>
                 <td class="value">{ percent(mmrNonMedical) }</td>
               </tr>
 
               <tr>
-                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> medical excemptions</td>
+                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> medical excemption</td>
                 <td class="value">{ percent(mmrMedical) }</td>
               </tr>
 
               <tr>
-                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> partial or no doses</td>
+                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> partial or no doses &dagger;</td>
                 <td class="value">{ percent((mmrPartial || 0) + (mmrNoDoses || 0)) }</td>
               </tr>
             </tbody>
@@ -50,10 +50,12 @@
         <div class="col col-50">
           <div class="mmr-vac-chart">
             <Histogram
+              title="Histogram chart showing distribution of vaccination rates in child care centers and kindergartens."
+              noLabel="{ true }"
               data="{ stats.mmrVac.histogram }"
               yMax="{ maxBy(stats.mmrVac.histogram, 'count').count * 1.1 }"
               annotationLines="{ [mmrVac] }">
-              The chart belows shows the rate of <abbr title="Measles, Mumps, and Rubella">MMR</abbr> fully vaccinated in all kindergartens and child care centers in Minnesota.  { name } had a rate of { percent(mmrVac) } as of ??.
+              This chart shows the rate of <abbr title="Measles, Mumps, and Rubella">MMR</abbr> fully-vaccinated in all kindergartens and child care centers in Minnesota.  { name } had a rate of { percent(mmrVac) }.
             </Histogram>
           </div>
         </div>
@@ -71,7 +73,7 @@
           </div>
 
           <div class="rate-vac-label">
-            Fully vaccinated
+            Fully-vaccinated
           </div>
         </div>
 
@@ -85,7 +87,7 @@
           </div>
 
           <div class="rate-vac-label">
-            Fully vaccinated
+            Fully-vaccinated
           </div>
         </div>
 
@@ -99,7 +101,7 @@
           </div>
 
           <div class="rate-vac-label">
-            Fully vaccinated
+            Fully-vaccinated
           </div>
         </div>
 
@@ -113,7 +115,7 @@
           </div>
 
           <div class="rate-vac-label">
-            Fully vaccinated
+            Fully-vaccinated
           </div>
         </div>
 
@@ -127,7 +129,7 @@
           </div>
 
           <div class="rate-vac-label">
-            Fully vaccinated
+            Fully-vaccinated
           </div>
         </div>
       </div>
