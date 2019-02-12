@@ -11,35 +11,41 @@
     <div>
       <div class="vaccination-rates row">
 
-        <div class="col col-25 rate">
-          <div class="rate-label">
-            Enrollment
-          </div>
+        <div class="col col-50">
+          <table class="stats-table">
+            <thead class="sr-only">
+              <tr><th>Label</th><th>Value</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Enrollment</td>
+                <td class="value"><strong>{ enrollment }</strong></td>
+              </tr>
 
-          <div class="rate-vac">
-            { enrollment }
-          </div>
+              <tr>
+                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> fully vaccination rate</td>
+                <td class="value"><strong>{ percent(mmrVac) }</strong></td>
+              </tr>
 
-          <div class="rate-vac-label">
-            { type === 'child-care-center' ? 'Children 24 months and older' : '' }
-          </div>
+              <tr>
+                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> non-medical excemptions</td>
+                <td class="value">{ percent(mmrNonMedical) }</td>
+              </tr>
+
+              <tr>
+                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> medical excemptions</td>
+                <td class="value">{ percent(mmrMedical) }</td>
+              </tr>
+
+              <tr>
+                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> partial or no doses</td>
+                <td class="value">{ percent((mmrPartial || 0) + (mmrNoDoses || 0)) }</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <div class="col col-25 rate">
-          <div class="rate-label">
-            <abbr title="Measles, Mumps, and Rubella">MMR</abbr>
-          </div>
-
-          <div class="rate-vac">
-            { percent(mmrVac) }
-          </div>
-
-          <div class="rate-vac-label">
-            Fully vaccinated
-          </div>
-        </div>
-
-        <div class="col col-50 rate">
+        <div class="col col-50">
           <div class="mmr-vac-chart">
             <Histogram
               data="{ stats.mmrVac.histogram }"

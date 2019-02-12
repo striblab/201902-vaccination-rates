@@ -57,4 +57,14 @@
   .mmr-vac-chart {
     text-align: left;
   }
+
+  .stats-table {
+    td {
+      vertical-align: bottom;
+    }
+
+    strong {
+      font-size: 1.5em;
+    }
+  }
 }
