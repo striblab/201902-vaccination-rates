@@ -33,6 +33,14 @@
     text-align: center;
   }
 
+  .chart-col {
+    display: none;
+
+    @include media-breakpoint-up("md") {
+      display: block;
+    }
+  }
+
   .vaccination-rates {
     padding-top: 2em;
   }
@@ -40,19 +48,39 @@
   .rate {
     text-align: center;
     margin-bottom: 2em;
+
+    &.no-rate {
+      display: none;
+
+      @include media-breakpoint-up("sm") {
+        display: block;
+      }
+    }
   }
 
   .rate-label {
-    font-size: 1em;
+    font-size: 0.85em;
+
+    @include media-breakpoint-up("md") {
+      font-size: 1em;
+    }
   }
 
   .rate-vac {
-    font-size: 2em;
+    font-size: 1.5em;
+
+    @include media-breakpoint-up("md") {
+      font-size: 2em;
+    }
   }
 
   .rate-vac-label {
-    font-size: 0.85em;
+    font-size: 0.75em;
     color: map-get($grays, "medium");
+
+    @include media-breakpoint-up("md") {
+      font-size: 0.85em;
+    }
   }
 
   .second-row {

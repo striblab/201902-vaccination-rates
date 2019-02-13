@@ -50,8 +50,8 @@ $(document).ready(() => {
   // Get data
   window
     .fetch(
-      'https://static.startribune.com/news/projects-staging/all/201902-vaccination-rates/assets/data/locations.json'
-      //'../assets/data/locations.json'
+      //'https://static.startribune.com/news/projects-staging/all/201902-vaccination-rates/assets/data/locations.json'
+      '../assets/data/locations.json'
     )
     .then(r => r.json())
     .then(locations => {

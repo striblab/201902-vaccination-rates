@@ -8,14 +8,14 @@
 
       <div class="byline">
         <address>By
-          <a rel="author" href="http://startribune.com/maryjo-webster/303594441/">MaryJo Webster</a>
-          and
           <a rel="author" href="http://startribune.com/maryjo-webster/440928273/">Alan Palazzolo</a>
+          and
+          <a rel="author" href="http://startribune.com/maryjo-webster/303594441/">MaryJo Webster</a>
         </address>
         <span class="spacer"></span>
         Star Tribune
         <span class="spacer-alt"></span>
-        <time pubdate datetime="2019-01-22T10:00:00">January 22, 2019</time>
+        <time pubdate datetime="2019-02-14T10:00:00">February 14, 2019</time>
       </div>
 
       <div class="share-placeholder">
@@ -68,9 +68,9 @@
         <aside>
           <h3 class="label">Notable locations</h3>
 
-          <ul>
+          <ul class="cf">
             {#each Object.entries(locationLists) as [li, l]}
-              <li><a href="#/{ li }" class="{ locationList === li ? 'active' : ''}" on:click="specificList(l, li, event)">{ l.title }</li>
+              <li><a href="#/{ li }" class="{ locationList === li ? 'active' : ''}" on:click="specificList(l, li, event)">{@html l.title }</li>
             {/each}
           </ul>
         </aside>
@@ -112,6 +112,7 @@
       <ul>
         <li>To protect privacy, schools and school districts with kindergarten enrollment of fewer than 5 children have their data redacted.</li>
         <li>&dagger; "Partially vaccinated or no doses" includes students who are in the process of completing a vaccine series, have not been vaccinated and do not have an exemption on file, or who did not submit vaccine records to their school health staff.</li>
+        <li>&Dagger; "No doses" includes students who have not been vaccinated and do not have an exemption on file, or who did not submit vaccine records to their school health staff.</li>
       </ul>
     </footer>
   </div>
@@ -247,15 +248,29 @@
         noResults: false,
         locationLists: {
           "lowest-child-care-centers": {
-            title: "Child care centers with the lowest rates",
+            title:
+              'Child care centers with the lowest <abbr title="Measles, Mumps, and Rubella">MMR</abbr> rates',
             filter: l => l.type === "child-care-centers" && !l.exclusion,
-            sort: [[l => l.mmrVac, "asc"]],
+            sort: [[l => l.mmrVac, "asc"], [l => l.name, "asc"]],
             limit: 20
           },
           "lowest-kindergartens": {
-            title: "Kindergartens with the lowest rates",
+            title:
+              'Kindergartens with the lowest <abbr title="Measles, Mumps, and Rubella">MMR</abbr> rates',
             filter: l => l.type === "kindergarten" && !l.exclusion,
-            sort: [[l => l.mmrVac, "asc"]],
+            sort: [[l => l.mmrVac, "asc"], [l => l.name, "asc"]],
+            limit: 20
+          },
+          "highest-enrollment-child-care-centers": {
+            title: "Child care centers with the highest enrollment",
+            filter: l => l.type === "child-care-centers" && !l.exclusion,
+            sort: [[l => l.enrollment, "desc"], [l => l.name, "asc"]],
+            limit: 20
+          },
+          "highest-enrollment-kindergartens": {
+            title: "Kindergartens with the highest enrollment",
+            filter: l => l.type === "kindergarten" && !l.exclusion,
+            sort: [[l => l.enrollment, "desc"], [l => l.name, "asc"]],
             limit: 20
           }
         }

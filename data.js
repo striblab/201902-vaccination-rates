@@ -284,7 +284,7 @@ function toTitleCase(input) {
     });
 
   // Certain words such as initialisms or acronyms should be left uppercase
-  uppers = ['Id', 'Tv', 'ii', 'iii', 'iv', 'v', 'vi'];
+  uppers = ['Id', 'Tv', 'ii', 'iii', 'iv', 'v', 'vi', 'iq', 'jw'];
   for (i = 0, j = uppers.length; i < j; i++)
     str = str.replace(
       new RegExp('\\b' + uppers[i] + '\\b', 'gi'),
@@ -298,8 +298,10 @@ function toTitleCase(input) {
 function nameFixes(input) {
   return input.replace(/([^\W_]+[^\s-]*) */g, function(txt) {
     return txt
-      .replace(/^(el\.?|elem\.?)(\s*)$/i, 'Elementary$1')
-      .replace(/^sch\.?(\s*)$/i, 'School$1');
+      .replace(/^elem\.?(\s*)$/i, 'Elementary$1')
+      .replace(/^el\.?(\s*)$/i, 'Elementary$1')
+      .replace(/^sch\.?(\s*)$/i, 'School$1')
+      .replace(/^m\.w\.(\s*)$/i, 'M.W.$1');
   });
 }
 

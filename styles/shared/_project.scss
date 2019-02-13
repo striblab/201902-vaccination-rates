@@ -30,13 +30,31 @@
 }
 
 .location-lists {
-  &.col {
-    padding-left: 2em;
+  aside {
+    margin-top: 0;
+  }
+
+  @include media-breakpoint-up("md") {
+    &.col {
+      padding-left: 2em;
+    }
   }
 
   ul {
     margin: 0;
     font-size: 0.85em;
+  }
+
+  li {
+    margin-bottom: 0.5em;
+    width: 50%;
+    padding-right: 1em;
+    float: left;
+
+    @include media-breakpoint-up("md") {
+      width: 100%;
+      float: none;
+    }
   }
 
   .active {
