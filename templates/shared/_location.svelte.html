@@ -2,7 +2,11 @@
   <div class="location-header">
     <div class="location-type">{ locationTypes[type] }</div>
     <h3>{ name }</h3>
-    <h4>{ city ? `${city}, MN` : `${district} ${district.match(/school/i) ? '' : 'school'} district` }</h4>
+
+    <h4>
+      { address ? `${address}, ` : '' }
+      { city ? `${city}, MN` : `${district} ${district.match(/school/i) ? '' : 'school'} district` }
+    </h4>
   </div>
 
   {#if exclusion}
@@ -18,6 +22,7 @@
             <thead class="sr-only">
               <tr><th>Label</th><th>Value</th></tr>
             </thead>
+
             <tbody>
               <tr>
                 <td>Enrollment</td>
@@ -30,12 +35,12 @@
               </tr>
 
               <tr>
-                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> non-medical excemption</td>
+                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> non-medical exemption</td>
                 <td class="value">{ percent(mmrNonMedical) }</td>
               </tr>
 
               <tr>
-                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> medical excemption</td>
+                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> medical exemption</td>
                 <td class="value">{ percent(mmrMedical) }</td>
               </tr>
 

@@ -97,6 +97,19 @@ function compileData() {
   );
   console.warn(`Filtered ${preFilterLength - daycares.length} daycares.`);
 
+  // Get some info from the licensing data
+  daycares = _.map(daycares, d => {
+    let f = _.find(licensing, l => {
+      return l.license_num === d.license.toString();
+    });
+
+    if (f && (f.address_line1 || f.address_line2)) {
+      d.address = _.filter([f.address_line1, f.address_line2]).join(', ');
+    }
+
+    return d;
+  });
+
   // Add some data
   daycares = _.map(daycares, d => {
     d.type = 'child-care-centers';
