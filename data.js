@@ -39,6 +39,13 @@ const commonHeaders = {
   ],
   hepA: ['hepAVac', 'hepANoDoses', 'hepANonMedical', 'hepAMedical']
 };
+const allCommonHeaders = _.reduce(
+  commonHeaders,
+  (m, v) => {
+    return m.concat(v);
+  },
+  []
+);
 
 // Compile data
 function compileData() {
@@ -159,7 +166,31 @@ function compileData() {
 
   // Cleanup a bit
   locations = _.map(locations, l => {
-    return _.omit(l, ['blankColumn01']);
+    // Don't need
+    l = _.omit(l, ['blankColumn01']);
+
+    // Don't use non vac numbers
+    Object.keys(commonHeaders).forEach(v => {
+      if (v !== 'mmr') {
+        _.each(l, (f, k) => {
+          if (k.indexOf(v) === 0 && k !== `${v}Vac`) {
+            delete l[k];
+          }
+        });
+      }
+    });
+
+    // Make sure numbers
+    allCommonHeaders.forEach(h => {
+      if (!_.isNumber(l[h])) {
+        delete l[h];
+      }
+      else {
+        l[h] = Math.round(l[h] * 10000) / 10000;
+      }
+    });
+
+    return l;
   });
 
   return locations;
@@ -179,7 +210,10 @@ function stats() {
   // Make aggregate data
   let stats = {};
   _.each(
-    ['mmrVac', 'dtapVac', 'hibVac', 'polioVac', 'hepBVac', 'hepAVac'],
+    [
+      'mmrVac'
+      // 'dtapVac', 'hibVac', 'polioVac', 'hepBVac', 'hepAVac'
+    ],
     f => {
       let s = _.filter(_.map(locations, f), d => _.isNumber(d));
 
