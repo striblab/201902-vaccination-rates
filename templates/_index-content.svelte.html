@@ -51,7 +51,7 @@
           <div class="form-item form-item-input">
             <label class="sr-only" for="place-search">Search for a location</label>
 
-            <input type="search" ref:placeSelect  id="place-search" bind:value="placeSearch"  placeholder="Enter a center, school, or district" aria-describedby="place-search-help">
+            <input type="search" ref:placeSelect  id="place-search" bind:value="placeSearch"  placeholder="{ loadingLocations ? 'Loading data...' : 'Enter search terms' }" aria-describedby="place-search-help" disabled="{ loadingLocations }">
 
             <small id="place-search-help">
               Type in name, city, or district keywords to search for a child care center or kindergarten in Minnesota.
@@ -59,14 +59,14 @@
           </div>
 
           <div class="form-item">
-            <button type="submit" on:click="handleSearch(event)">Search</button>
+            <button type="submit" on:click="handleSearch(event)" disabled="{ loadingLocations }">Search</button>
           </div>
         <form>
       </div>
 
       <div class="col col-100 col-md-40 location-lists">
         <aside>
-          <h3 class="label">Notable locations</h3>
+          <!-- <h3 class="label">Notable locations</h3> -->
 
           <ul class="cf">
             {#each Object.entries(locationLists) as [li, l]}
@@ -79,7 +79,11 @@
   </div>
 
   <div class="container-lg">
-    {#if noResults}
+    {#if loadingLocations}
+      <p class="loading-lcoations search-note">
+        Loading kindergartens and child care center data for searching...
+      </p>
+    {:elseif noResults}
       <p class="no-results search-note">
         Your search did not find any results.
       </p>
@@ -137,6 +141,11 @@
       if (this.get().attachShare) {
         this.get().attachShare();
       }
+
+      // If we have locations
+      this.set({
+        loadingLocations: !(locations && locations.length)
+      });
 
       // Create search index
       let index = lunr(function() {
@@ -241,6 +250,8 @@
 
     data() {
       return {
+        isBrowser: typeof window !== "undefined",
+        loadingLocations: true,
         placeSearch: "",
         searchResultsLimit: 20,
         searchResults: [],

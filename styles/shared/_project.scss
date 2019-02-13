@@ -32,6 +32,10 @@
 .location-lists {
   aside {
     margin-top: 0;
+
+    @include media-breakpoint-up("md") {
+      margin-top: 2em;
+    }
   }
 
   @include media-breakpoint-up("md") {
