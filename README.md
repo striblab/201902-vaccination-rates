@@ -4,29 +4,9 @@ Lookup of vaccination rates
 
 ## Application data
 
-- Data processed from Star Tribune (link?) as `sources/schools_vax.json`.
-  - Includes:
-    - Child care centers vaccinations rates from [MN Department of Health](http://www.health.state.mn.us/divs/idepc/immunize/stats/childcare/index.html).
-    - Kindergarten vaccinations rates from [MN Department of Health](http://www.health.state.mn.us/divs/idepc/immunize/stats/school/index.html).
+- Child care centers vaccinations rates from [MN Department of Health](http://www.health.state.mn.us/divs/idepc/immunize/stats/childcare/index.html).
+- Kindergarten vaccinations rates from [MN Department of Health](http://www.health.state.mn.us/divs/idepc/immunize/stats/school/index.html).
 - Active license and address information manually compiled and not in repo. Should be put into `sources/childcare_vax.json`.
-  - Should be something like:
-  ```js
-  [{
-  "license_num": "xxx",
-  "center_name": "xxxxx",
-  "enrollment_2yrsup": 5,
-  "MMR_pct_vac": 1,
-  "MMR_pct_nodoses": 0,
-  "MMR_pct_nonmedical": 0,
-  "MMR_pct_medical": 0,
-  "address_line1": "123 Way St",
-  "city": "City",
-  "state": "MN",
-  "zip": "55555",
-  "county": "County",
-  "capacity": 100
-  }, ... ]
-  ```
 
 Get source data:
 
