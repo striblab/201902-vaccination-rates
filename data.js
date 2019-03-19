@@ -49,27 +49,6 @@ const allCommonHeaders = _.reduce(
 
 // Compile data
 function compileData() {
-  // Daycares (child care centers)
-  let licensing = JSON.parse(
-    fs.readFileSync(path.join(__dirname, 'sources', 'childcare_vax.json'))
-  );
-  let daycares = csvParse(
-    fs.readFileSync(path.join(__dirname, 'sources', 'child-care-centers.csv')),
-    {
-      cast: true,
-      from_line: 8,
-      columns: ['license', 'name', 'city', 'enrollment']
-        .concat(commonHeaders.hepB)
-        .concat(commonHeaders.dtap)
-        .concat(commonHeaders.polio)
-        .concat(commonHeaders.hib)
-        .concat(alterSplice(commonHeaders.mmr, 1, 1))
-        .concat(commonHeaders.varicella)
-        .concat(commonHeaders.hepA)
-        .concat(['blankColumn01'])
-    }
-  );
-
   // Get school data
   let originalData = require('./sources/schools_vax.json');
 
@@ -80,7 +59,7 @@ function compileData() {
       district: d.disname,
       //name: d.schname,
       // orgidmde: '012396100000',
-      //enrollment: parseInt(d.enroll, 10),
+      enrollment: parseInt(d.enroll, 10),
       //complete_dtap: 52,
       dtapVac: d.complete_pert_dtap,
       //inprogress_dtap: 3,
@@ -123,21 +102,19 @@ function compileData() {
       varicellaNonMedical: d.co_pert_var,
       //me_var: 0,
       varicellaMedical: d.me_pert_var,
-      enrollment: d.enroll_new,
+      //enroll_new: 58,
       id: d.schoolID,
-      grade: d.grade === 'Kindergarten' ? 'kindergarten' : '7th-grade',
-      type: 'schools',
+      type: d.grade === 'Kindergarten' ? 'kindergarten' : '7th-grade',
       year: d.yr,
       //schoolYear: '2017-18',
       districtId: d.districtid,
       districtType: d.districttype,
-      name: d.school_name || toTitleCase(cleanString(d.schname)),
+      name: d.school_name,
       city: d.physical_city,
       county: d.county,
-      grades: cleanString(d.grades),
+      grades: d.grades ? d.grades.trim() : undefined,
       classification: d.school_classification,
       schoolType: d.schooltype,
-      schoolTypeOther: d.type2,
       //datayear: '17-18',
       k12Enrollment: d.k12enr,
       //freek12: 105,
@@ -152,10 +129,7 @@ function compileData() {
         ? false
         : d.mmr_pocket.match(/^yes$/i)
           ? true
-          : undefined,
-      exlusion: d.mmr_pocket.match(/not reported/i)
-        ? 'not-reporting'
-        : undefined
+          : undefined
     };
   });
 
@@ -189,12 +163,16 @@ function compileData() {
   // Add some data
   daycares = _.map(daycares, d => {
     d.type = 'child-care-centers';
-    d.year = 2018;
+    return d;
+  });
+  kindergartens = _.map(kindergartens, d => {
+    d.type = 'kindergarten';
     return d;
   });
 
   // Alter some specific data
-  schools = _.map(schools, d => {
+  kindergartens = _.map(kindergartens, d => {
+    d.name = nameFixes(toTitleCase(cleanString(d.name)));
     d.district = toTitleCase(cleanString(d.district));
     return d;
   });
@@ -206,7 +184,7 @@ function compileData() {
   });
 
   // Combine data
-  let locations = [].concat(daycares).concat(schools);
+  let locations = [].concat(daycares).concat(kindergartens);
 
   // Standardize footnotes
   locations = _.map(locations, c => {
@@ -240,15 +218,12 @@ function compileData() {
 
   // Add id
   locations = _.map(locations, (l, i) => {
-    l.id = l.id || i.toString();
+    l.id = i.toString();
     return l;
   });
 
   // Filter out statewide
   locations = _.filter(locations, l => {
-    if (!l.name) {
-      console.warn(`No name for record: ${l.id}`);
-    }
     return !l.name.match(/statewide/i);
   });
 
@@ -256,31 +231,6 @@ function compileData() {
   locations = _.map(locations, l => {
     // Don't need
     l = _.omit(l, ['blankColumn01']);
-    // Make sure numbers
-    allCommonHeaders.forEach(h => {
-      if (!_.isNumber(l[h])) {
-        delete l[h];
-      }
-      else {
-        l[h] = Math.round(l[h] * 10000) / 10000;
-      }
-    });
-
-    return l;
-  });
-
-  // Data we are not actually using
-  let unnecessaryFields = [
-    'license',
-    'county',
-    'districtId',
-    'districtType',
-    'reducedFreeLunch',
-    'incomeCategory',
-    'minority'
-  ];
-  locations = _.map(locations, l => {
-    l = _.omit(l, unnecessaryFields);
 
     // Don't use non vac numbers
     Object.keys(commonHeaders).forEach(v => {
@@ -293,39 +243,17 @@ function compileData() {
       }
     });
 
-    return l;
-  });
-
-  // Group by location, grade, and by year
-  let locationFields = [
-    'district',
-    'id',
-    'name',
-    'address',
-    'grades',
-    'classification',
-    'schoolType',
-    'schoolTypeOther',
-    'type',
-    'k12Enrollment',
-    'city'
-  ];
-  locations = _.map(_.groupBy(locations, 'id'), s => {
-    let school = _.pick(s[0], locationFields);
-    school.grades = _.map(_.groupBy(s, g => g.grade || 'all'), (g, gi) => {
-      return {
-        grade: gi,
-        years: _.orderBy(
-          _.map(g, y => {
-            return _.omit(y, locationFields);
-          }),
-          ['year'],
-          ['desc']
-        )
-      };
+    // Make sure numbers
+    allCommonHeaders.forEach(h => {
+      if (!_.isNumber(l[h])) {
+        delete l[h];
+      }
+      else {
+        l[h] = Math.round(l[h] * 10000) / 10000;
+      }
     });
 
-    return school;
+    return l;
   });
 
   return locations;
@@ -345,27 +273,12 @@ function stats() {
   // Make aggregate data
   let stats = {};
   _.each(
-    {
-      'child-care-centers--all--2018--mmrVac': d => {
-        let grade = _.find(d.grades, { grade: 'all' });
-        let year = _.find(grade ? grade.years : undefined, { year: 2018 });
-        return d.type === 'child-care-centers' && grade && year
-          ? year.mmrVac
-          : undefined;
-      },
-      'schools--kindergarten--2018--mmrVac': d => {
-        let grade = _.find(d.grades, { grade: 'kindergarten' });
-        let year = _.find(grade ? grade.years : undefined, { year: 2018 });
-        return d.type === 'schools' && grade && year ? year.mmrVac : undefined;
-      },
-      'schools--7th-grade--2018--mmrVac': d => {
-        let grade = _.find(d.grades, { grade: '7th-grade' });
-        let year = _.find(grade ? grade.years : undefined, { year: 2018 });
-        return d.type === 'schools' && grade && year ? year.mmrVac : undefined;
-      }
-    },
-    (fData, f) => {
-      let s = _.filter(_.map(locations, fData), d => _.isNumber(d));
+    [
+      'mmrVac'
+      // 'dtapVac', 'hibVac', 'polioVac', 'hepBVac', 'hepAVac'
+    ],
+    f => {
+      let s = _.filter(_.map(locations, f), d => _.isNumber(d));
 
       // Top level stats
       stats[f] = stats[f] || {};
@@ -431,11 +344,6 @@ function toTitleCase(input) {
   let str;
   let lowers;
   let uppers;
-
-  if (!_.isString(input)) {
-    return undefined;
-  }
-
   str = input.replace(/([^\W_]+[^\s-]*) */g, function(txt) {
     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
   });
