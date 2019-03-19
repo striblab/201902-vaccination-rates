@@ -9,143 +9,165 @@
     </h4>
   </div>
 
-  {#if exclusion}
-    <div class="exclusion">
-      <p>{ exclusionNotes }</p>
-    </div>
-  {:else}
-    <div>
-      <div class="vaccination-rates row">
+  {#each grades as g (g.grade)}
+    <h5>{ g.grade }</h5>
 
-        <div class="col col-100 col-md-50">
-          <table class="stats-table">
-            <thead class="sr-only">
-              <tr><th>Label</th><th>Value</th></tr>
-            </thead>
+    {#if exclusion}
+      <div class="exclusion">
+        <p>{ exclusionNotes }</p>
+      </div>
+    {:else}
+      <div>
+        <div class="vaccination-rates row">
 
-            <tbody>
-              <tr>
-                <td>Enrollment</td>
-                <td class="value"><strong>{ enrollment }</strong></td>
-              </tr>
+          <div class="col col-100 col-md-50">
+            <table class="stats-table">
+              <thead>
+                <tr>
+                  <th class="sr-only">Label</th>
+                  {#each g.years as y (y.year)}
+                    <th>{ y.year - 1 } - { y.year }</th>
+                  {/each}
+                </tr>
+              </thead>
 
-              <tr>
-                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> fully-vaccinated</td>
-                <td class="value mmr-value"><strong>{ percent(mmrVac) }</strong></td>
-              </tr>
+              <tbody>
+                <tr>
+                  <td>Enrollment</td>
+                  {#each g.years as y (y.year)}
+                    <td class="value"><strong>{ y.enrollment }</strong></td>
+                  {/each}
+                </tr>
 
-              <tr>
-                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> non-medical exemption</td>
-                <td class="value">{ percent(mmrNonMedical) }</td>
-              </tr>
+                <tr>
+                  <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> fully-vaccinated</td>
+                  {#each g.years as y (y.year)}
+                    <td class="value mmr-value"><strong>{ percent(y.mmrVac) }</strong></td>
+                  {/each}
+                </tr>
 
-              <tr>
-                <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> medical exemption</td>
-                <td class="value">{ percent(mmrMedical) }</td>
-              </tr>
+                <tr>
+                  <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> non-medical exemption</td>
+                  {#each g.years as y (y.year)}
+                    <td class="value">{ percent(y.mmrNonMedical) }</td>
+                  {/each}
+                </tr>
 
-              <tr>
-                <td>
-                  {#if type === 'child-care-centers'}
-                    <abbr title="Measles, Mumps, and Rubella">MMR</abbr> no doses &Dagger;
-                  {:else}
-                    <abbr title="Measles, Mumps, and Rubella">MMR</abbr> partial or no doses &dagger;
-                  {/if}
-                </td>
-                <td class="value">{ percent((mmrPartial || 0) + (mmrNoDoses || 0)) }</td>
-              </tr>
-            </tbody>
-          </table>
+                <tr>
+                  <td><abbr title="Measles, Mumps, and Rubella">MMR</abbr> medical exemption</td>
+                  {#each g.years as y (y.year)}
+                    <td class="value">{ percent(y.mmrMedical) }</td>
+                  {/each}
+                </tr>
+
+                <tr>
+                  <td>
+                    {#if type === 'child-care-centers'}
+                      <abbr title="Measles, Mumps, and Rubella">MMR</abbr> no doses &Dagger;
+                    {:else}
+                      <abbr title="Measles, Mumps, and Rubella">MMR</abbr> partial or no doses &dagger;
+                    {/if}
+                  </td>
+
+                  {#each g.years as y (y.year)}
+                    <td class="value">{ y.mmrPartialNoDoses ? percent(y.mmrPartialNoDoses) : percent((y.mmrPartial || 0) + (y.mmrNoDoses || 0)) }</td>
+                  {/each}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="col col-100 col-md-50 chart-col">
+            <div class="mmr-vac-chart">
+              {#if g.years[0].year === 2018}
+                <Histogram
+                  title="Histogram chart showing distribution of vaccination rates in { gradeNamesPlural[g.grade] } in 2018."
+                  noLabel="{ true }"
+                  data="{ stats[`${ type }--${ g.grade }--2018--mmrVac`].histogram }"
+                  yMax="{ maxBy(stats[`${ type }--${ g.grade }--2018--mmrVac`].histogram, 'count').count * 1.1 }"
+                  annotationLines="{ [g.years[0].mmrVac] }">
+                  This chart shows the rate of <abbr title="Measles, Mumps, and Rubella">MMR</abbr> fully-vaccinated in { gradeNamesPlural[g.grade] } in Minnesota.  { name } had a rate of { percent(g.years[0].mmrVac) }.
+                </Histogram>
+              {/if}
+            </div>
+          </div>
         </div>
 
-        <div class="col col-100 col-md-50 chart-col">
-          <div class="mmr-vac-chart">
-            <Histogram
-              title="Histogram chart showing distribution of vaccination rates in child care centers and kindergartens."
-              noLabel="{ true }"
-              data="{ stats.mmrVac.histogram }"
-              yMax="{ maxBy(stats.mmrVac.histogram, 'count').count * 1.1 }"
-              annotationLines="{ [mmrVac] }">
-              This chart shows the rate of <abbr title="Measles, Mumps, and Rubella">MMR</abbr> fully-vaccinated in all kindergartens and child care centers in Minnesota.  { name } had a rate of { percent(mmrVac) }.
-            </Histogram>
+        <div class="vaccination-rates row second-row">
+
+          <div class="col col-33 col-sm-20 rate { !dtapVac ? 'no-rate' : '' }">
+            <div class="rate-label">
+              <abbr title="Diphtheria, Tetanus, and Whooping cough (Pertussis)">DTaP</abbr>
+            </div>
+
+            <div class="rate-vac">
+              { percent(dtapVac) }
+            </div>
+
+            <div class="rate-vac-label">
+              Fully-vaccinated
+            </div>
+          </div>
+
+          <div class="col col-33 col-sm-20 rate { !polioVac ? 'no-rate' : '' }">
+            <div class="rate-label">
+              Polio
+            </div>
+
+            <div class="rate-vac">
+              { percent(polioVac) }
+            </div>
+
+            <div class="rate-vac-label">
+              Fully-vaccinated
+            </div>
+          </div>
+
+          <div class="col col-33 col-sm-20 rate { !hepBVac ? 'no-rate' : '' }">
+            <div class="rate-label">
+              Hepatitis B
+            </div>
+
+            <div class="rate-vac">
+              { percent(hepBVac) }
+            </div>
+
+            <div class="rate-vac-label">
+              Fully-vaccinated
+            </div>
+          </div>
+
+          <div class="col col-33 col-sm-20 rate { !hepAVac ? 'no-rate' : '' }">
+            <div class="rate-label">
+              Hepatitis A
+            </div>
+
+            <div class="rate-vac">
+              { percent(hepAVac) }
+            </div>
+
+            <div class="rate-vac-label">
+              Fully-vaccinated
+            </div>
+          </div>
+
+          <div class="col col-33 col-sm-20 rate { !hibVac ? 'no-rate' : '' }">
+            <div class="rate-label">
+              <abbr title="Haemophilus influenzae type b">Hib</abbr>
+            </div>
+
+            <div class="rate-vac">
+              { percent(hibVac) }
+            </div>
+
+            <div class="rate-vac-label">
+              Fully-vaccinated
+            </div>
           </div>
         </div>
       </div>
-
-      <div class="vaccination-rates row second-row">
-
-        <div class="col col-33 col-sm-20 rate { !dtapVac ? 'no-rate' : '' }">
-          <div class="rate-label">
-            <abbr title="Diphtheria, Tetanus, and Whooping cough (Pertussis)">DTaP</abbr>
-          </div>
-
-          <div class="rate-vac">
-            { percent(dtapVac) }
-          </div>
-
-          <div class="rate-vac-label">
-            Fully-vaccinated
-          </div>
-        </div>
-
-        <div class="col col-33 col-sm-20 rate { !polioVac ? 'no-rate' : '' }">
-          <div class="rate-label">
-            Polio
-          </div>
-
-          <div class="rate-vac">
-            { percent(polioVac) }
-          </div>
-
-          <div class="rate-vac-label">
-            Fully-vaccinated
-          </div>
-        </div>
-
-        <div class="col col-33 col-sm-20 rate { !hepBVac ? 'no-rate' : '' }">
-          <div class="rate-label">
-            Hepatitis B
-          </div>
-
-          <div class="rate-vac">
-            { percent(hepBVac) }
-          </div>
-
-          <div class="rate-vac-label">
-            Fully-vaccinated
-          </div>
-        </div>
-
-        <div class="col col-33 col-sm-20 rate { !hepAVac ? 'no-rate' : '' }">
-          <div class="rate-label">
-            Hepatitis A
-          </div>
-
-          <div class="rate-vac">
-            { percent(hepAVac) }
-          </div>
-
-          <div class="rate-vac-label">
-            Fully-vaccinated
-          </div>
-        </div>
-
-        <div class="col col-33 col-sm-20 rate { !hibVac ? 'no-rate' : '' }">
-          <div class="rate-label">
-            <abbr title="Haemophilus influenzae type b">Hib</abbr>
-          </div>
-
-          <div class="rate-vac">
-            { percent(hibVac) }
-          </div>
-
-          <div class="rate-vac-label">
-            Fully-vaccinated
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+    {/if}
+  {/each}
 </div>
 
 <script>
@@ -188,14 +210,21 @@
         return placeholder;
       },
 
-      maxBy
+      maxBy,
+      find
     },
 
     data() {
       return {
         locationTypes: {
           "child-care-centers": "Child care center",
-          kindergarten: "Kindergarten"
+          schools: "School"
+          //kindergarten: "Kindergarten"
+        },
+        gradeNamesPlural: {
+          all: "child care centers",
+          kindergarten: "kindergartens",
+          "7th-grade": "7th grades"
         }
       };
     }
