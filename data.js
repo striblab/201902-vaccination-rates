@@ -49,89 +49,39 @@ const allCommonHeaders = _.reduce(
 
 // Compile data
 function compileData() {
-  // Get school data
-  let originalData = require('./sources/schools_vax.json');
-
-  // Standardize school data
-  let schools = _.map(originalData, d => {
-    return {
-      //districtId: d.iddis,
-      district: d.disname,
-      //name: d.schname,
-      // orgidmde: '012396100000',
-      enrollment: parseInt(d.enroll, 10),
-      //complete_dtap: 52,
-      dtapVac: d.complete_pert_dtap,
-      //inprogress_dtap: 3,
-      dtapPartialNoDoses: d.inprogress_pert_dtap,
-      //co_dtap: 3,
-      dtapNonMedical: d.co_pert_dtap,
-      //me_dtap: 0,
-      dtapMedical: d.me_pert_dtap,
-      //complete_pol: 52,
-      polioVac: d.complete_pert_pol,
-      //inprogress_pol: 3,
-      polioPartialNoDoses: d.inprogress_pert_pol,
-      //co_pol: 3,
-      polioNonMedical: d.co_pert_pol,
-      //me_pol: 0,
-      polioMedical: d.me_pert_pol,
-      //complete_mmr: 52,
-      mmrVac: d.complete_pert_mmr,
-      //inprogress_mmr: 3,
-      mmrPartialNoDoses: d.inprogress_pert_mmr,
-      //co_mmr: 3,
-      mmrNonMedical: d.co_pert_mmr,
-      //me_mmr: 0,
-      mmrMedical: d.me_pert_mmr,
-      //complete_hepb: 53,
-      hepBVac: d.complete_pert_hepb,
-      //inprogress_hepb: 3,
-      hepBPartialNoDoses: d.inprogress_pert_hepb,
-      //co_hepb: 2,
-      hepBNonMedical: d.co_pert_hepb,
-      //me_hepb: 0,
-      hepBMedical: d.me_pert_hepb,
-      //complete_var: 53,
-      varicellaVac: d.complete_pert_var,
-      //inprogress_var: 3,
-      varicellaPartialNoDoses: d.inprogress_pert_var,
-      // ?? disease_hist_var: 0,
-      // ?? d.diseasehist_pert_var: 0,
-      //co_var: 2,
-      varicellaNonMedical: d.co_pert_var,
-      //me_var: 0,
-      varicellaMedical: d.me_pert_var,
-      //enroll_new: 58,
-      id: d.schoolID,
-      type: d.grade === 'Kindergarten' ? 'kindergarten' : '7th-grade',
-      year: d.yr,
-      //schoolYear: '2017-18',
-      districtId: d.districtid,
-      districtType: d.districttype,
-      name: d.school_name,
-      city: d.physical_city,
-      county: d.county,
-      grades: d.grades ? d.grades.trim() : undefined,
-      classification: d.school_classification,
-      schoolType: d.schooltype,
-      //datayear: '17-18',
-      k12Enrollment: d.k12enr,
-      //freek12: 105,
-      //redk12: 37,
-      reducedFreeLunch: d.pctpoverty,
-      incomeCategory: d.income_bucket,
-      //total_students: 310,
-      //total_minority: 36,
-      minority: d.pctminority,
-      diversityCategory: d.diversity_bucket,
-      mmrLow: d.mmr_pocket.match(/^no$/i)
-        ? false
-        : d.mmr_pocket.match(/^yes$/i)
-          ? true
-          : undefined
-    };
-  });
+  let licensing = JSON.parse(
+    fs.readFileSync(path.join(__dirname, 'sources', 'childcare_vax.json'))
+  );
+  let daycares = csvParse(
+    fs.readFileSync(path.join(__dirname, 'sources', 'child-care-centers.csv')),
+    {
+      cast: true,
+      from_line: 8,
+      columns: ['license', 'name', 'city', 'enrollment']
+        .concat(commonHeaders.hepB)
+        .concat(commonHeaders.dtap)
+        .concat(commonHeaders.polio)
+        .concat(commonHeaders.hib)
+        .concat(alterSplice(commonHeaders.mmr, 1, 1))
+        .concat(commonHeaders.varicella)
+        .concat(commonHeaders.hepA)
+        .concat(['blankColumn01'])
+    }
+  );
+  let kindergartens = csvParse(
+    fs.readFileSync(path.join(__dirname, 'sources', 'kindergartens.csv')),
+    {
+      cast: true,
+      from_line: 10,
+      columns: ['district', 'name', 'enrollment']
+        .concat(alterSplice(commonHeaders.dtap, 2, 1))
+        .concat(alterSplice(commonHeaders.polio, 2, 1))
+        .concat(alterSplice(commonHeaders.mmr, 2, 1))
+        .concat(alterSplice(commonHeaders.hepB, 2, 1))
+        .concat(commonHeaders.varicella)
+        .concat(['blankColumn01'])
+    }
+  );
 
   // Filter daycares that are licensed
   let preFilterLength = daycares.length;
