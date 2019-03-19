@@ -1,0 +1,87 @@
+
+<g class="grouped-bar">
+  {#each data as d, di}
+    {#if d.x && d.groups}
+      <g class="group" transform="translate({ xScalePrimary(d.x) }, 0)">
+        {#each d.groups as g, gi}
+          <rect class="histogram-bar"
+            x="{ xScaleSecondary(g.x) }"
+            y="{ Math.min(yScale(g.y), yScale(yMax * 0.01)) }"
+            width="{ xScaleSecondary.bandwidth() }"
+            height="{ chartHeight - (Math.min(yScale(g.y), yScale(yMax * 0.01))) }"
+          ></rect>
+        {/each}
+      </g>
+    {/if}
+  {:else}
+    <!-- -->
+  {/each}
+</g>
+
+<g class="axis x-axis">
+  {#if domainPrimary}
+    {#each domainPrimary as tick, i}
+      <g class="tick tick-{ i }"
+        transform="translate({ xScalePrimary(tick) + (xScalePrimary.bandwidth() / 2) }, { yScale.range()[0] })">
+        <line class="grid-line" y1="{ chartHeight * -1 }" y2="0" x1="0" x2="0"></line>
+        <text y="5" text-anchor="middle">{ xTickFormat ? xTickFormat(tick, i, xTicks.length) : tick }</text>
+      </g>
+    {/each}
+  {/if}
+
+  {#if xBaseline}
+    <line class="baseline" y1="{ chartHeight + 0.5 }" y2="{ chartHeight + 0.5}" x1="0" x2="{ chartWidth }"></line>
+  {/if}
+</g>
+
+<script>
+  import { scaleBand } from "d3-scale";
+
+  export default {
+    namespace: "svg",
+
+    computed: {
+      xScalePrimary({
+        scaleBand,
+        chartWidth,
+        type,
+        groupPadding,
+        groupPaddingInner,
+        domainPrimary
+      }) {
+        return type === "grouped-bar"
+          ? scaleBand()
+              .domain(domainPrimary)
+              .range([0, chartWidth])
+              .padding(groupPadding)
+              .paddingInner(groupPaddingInner)
+          : undefined;
+      },
+
+      xScaleSecondary({
+        scaleBand,
+        chartWidth,
+        type,
+        domainSecondary,
+        xScalePrimary,
+        barPadding
+      }) {
+        return type === "grouped-bar"
+          ? scaleBand()
+              .domain(domainSecondary)
+              .rangeRound([0, xScalePrimary.bandwidth()])
+              .padding(barPadding)
+          : undefined;
+      }
+    },
+
+    data() {
+      return {
+        groupPadding: 0.3,
+        groupPaddingInner: 0.3,
+        barPadding: 0.03,
+        scaleBand
+      };
+    }
+  };
+</script>
