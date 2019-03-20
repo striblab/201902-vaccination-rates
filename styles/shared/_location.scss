@@ -17,7 +17,7 @@
   }
 
   h3 {
-    font-size: 3em;
+    font-size: 2.8em;
     line-height: 1em;
     margin-bottom: 0.02em;
     padding-bottom: 0;
@@ -59,10 +59,10 @@
   }
 
   .rate-label {
-    font-size: 0.85em;
+    font-size: 0.8em;
 
     @include media-breakpoint-up("md") {
-      font-size: 1em;
+      font-size: 0.9em;
     }
   }
 
@@ -70,16 +70,16 @@
     font-size: 1.5em;
 
     @include media-breakpoint-up("md") {
-      font-size: 2em;
+      font-size: 1.5em;
     }
   }
 
   .rate-vac-label {
-    font-size: 0.75em;
+    font-size: 0.7em;
     color: map-get($grays, "medium");
 
     @include media-breakpoint-up("md") {
-      font-size: 0.85em;
+      font-size: 0.8em;
     }
   }
 
