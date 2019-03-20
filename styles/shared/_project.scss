@@ -1,7 +1,18 @@
 /**
  * Project specific styling.
  */
+.intro {
+  font-size: 0.9em;
 
+  .dw-chart {
+    padding-top: 1.5em;
+    margin-bottom: 2.5em;
+  }
+
+  p:last-child {
+    margin-bottom: 4em;
+  }
+}
 .locations {
   margin-bottom: 5em;
 }
