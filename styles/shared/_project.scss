@@ -2,7 +2,11 @@
  * Project specific styling.
  */
 .intro {
-  font-size: 0.9em;
+  font-size: 1em;
+
+  @include media-breakpoint-up("md") {
+    font-size: 0.9em;
+  }
 
   .dw-chart {
     padding-top: 1.5em;
@@ -65,6 +69,7 @@
     width: 50%;
     padding-right: 1em;
     float: left;
+    list-style: none;
 
     @include media-breakpoint-up("md") {
       width: 100%;
@@ -86,5 +91,6 @@
 
   ul li {
     margin-bottom: 0.5em;
+    list-style: none;
   }
 }
