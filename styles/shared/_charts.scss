@@ -47,8 +47,8 @@
       stroke-width: 1;
     }
 
-    &.tick-0 {
-      display: none;
+    &.tick-0 line {
+      stroke-width: 0;
     }
   }
 
