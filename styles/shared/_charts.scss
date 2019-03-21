@@ -46,6 +46,10 @@
       font-weight: 200;
       stroke-width: 1;
     }
+
+    &.tick-0 {
+      display: none;
+    }
   }
 
   .x-axis .tick text {
