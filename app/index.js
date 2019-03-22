@@ -51,7 +51,7 @@ $(document).ready(() => {
   window
     .fetch(
       'https://static.startribune.com/news/projects/all/201902-vaccination-rates/assets/data/locations.json'
-      '../assets/data/locations.json'
+      //'../assets/data/locations.json'
     )
     .then(r => r.json())
     .then(locations => {
