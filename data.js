@@ -72,14 +72,13 @@ function compileData() {
     fs.readFileSync(path.join(__dirname, 'sources', 'kindergartens.csv')),
     {
       cast: true,
-      from_line: 10,
-      columns: ['district', 'name', 'enrollment']
+      from_line: 1,
+      columns: ['distictId', 'district', 'name', 'id', 'enrollment']
         .concat(alterSplice(commonHeaders.dtap, 2, 1))
         .concat(alterSplice(commonHeaders.polio, 2, 1))
         .concat(alterSplice(commonHeaders.mmr, 2, 1))
         .concat(alterSplice(commonHeaders.hepB, 2, 1))
         .concat(commonHeaders.varicella)
-        .concat(['blankColumn01'])
     }
   );
 
@@ -124,6 +123,10 @@ function compileData() {
   kindergartens = _.map(kindergartens, d => {
     d.name = nameFixes(toTitleCase(cleanString(d.name)));
     d.district = toTitleCase(cleanString(d.district));
+
+    // if (d.name.match(/m.w.\s+savage/i)) {
+    //   console.log(d);
+    // }
     return d;
   });
 
