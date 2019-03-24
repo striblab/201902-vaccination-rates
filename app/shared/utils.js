@@ -493,6 +493,29 @@ function detachAndAttachElement(selector) {
   };
 }
 
+// Document ready, non-JQuery version
+// https://stackoverflow.com/questions/12528049/if-a-dom-element-is-removed-are-its-listeners-also-removed-from-memory
+function documentReady(handler) {
+  handler = typeof handler === 'function' ? handler : () => {};
+
+  // in case the document is already rendered
+  if (document.readyState != 'loading') {
+    handler();
+  }
+  // modern browsers
+  else if (document.addEventListener) {
+    document.addEventListener('DOMContentLoaded', handler);
+  }
+  // IE <= 8
+  else {
+    document.attachEvent('onreadystatechange', () => {
+      if (document.readyState == 'complete') {
+        handler();
+      }
+    });
+  }
+}
+
 // Export a generator for the class.
 export default {
   enablePym,
@@ -514,5 +537,6 @@ export default {
   isMobile,
   gaPage,
   gaEvent,
-  detachAndAttachElement
+  detachAndAttachElement,
+  documentReady
 };
