@@ -32,7 +32,9 @@
     <p>Almost one-third of Minnesota schools serving kindergartners meet that criteria, according to data released last year by the Minnesota Department of Health. Pockets of unvaccinated students are more common among charter schools and private schools — particularly those with small enrollments.</p>
 
     <div class="dw-chart">
-      <iframe title="Charter, private schools more likely to be at risk of outbreak" aria-label="Bar Chart" id="datawrapper-chart-TIoG9" src="//datawrapper.dwcdn.net/TIoG9/4/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important;" height="277"></iframe><script type="text/javascript">
+      <iframe title="Charter, private schools more likely to be at risk of outbreak" aria-label="Bar Chart" id="datawrapper-chart-TIoG9" src="//datawrapper.dwcdn.net/TIoG9/4/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important;" height="277"></iframe>
+
+      <script type="text/javascript">
   !(function() {
     "use strict";
     window.addEventListener("message", function(a) {
@@ -193,6 +195,9 @@
         if (!terms) {
           return;
         }
+
+        // Reset
+        this.resetSearch();
 
         // Values we need
         let { searchResultsLimit, locations } = this.get();
