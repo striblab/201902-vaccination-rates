@@ -10,6 +10,8 @@
             width="{ xScaleSecondary.bandwidth() }"
             height="{ chartHeight - (Math.min(yScale(g.y), yScale(yMax * 0.01))) }"
           ></rect>
+
+          <text y="{ chartHeight - (Math.min(yScale(g.y), yScale(yMax * 0.01))) }" text-anchor="middle">{ xTickFormat ? xTickFormat(tick, i, xTicks.length) : tick }</text>
         {/each}
       </g>
     {/if}
