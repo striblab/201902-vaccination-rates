@@ -32,9 +32,8 @@ initializeGa();
 // Mark page with note about development or staging
 utils.environmentNoting();
 
+// When ready
 utils.documentReady(() => {
-  // Common code to get svelte template loaded on the client and hack-ishly
-  // handle sharing
   // Hack to get share back
   const attachShare = utils.detachAndAttachElement('.share-placeholder');
 
